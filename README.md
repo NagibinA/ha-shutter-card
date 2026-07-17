@@ -18,6 +18,7 @@
   <img src="images/preview2.png" style="width: 450px; height: 280px; object-fit: cover; border-radius: 8px;" />
   <img src="images/shutter-cam-dual.jpg" style="width: 450px; height: 280px; object-fit: cover; border-radius: 8px;" />  
 </div>
+
 ---
 
 ## 🎛️ Визуальный редактор
