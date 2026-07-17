@@ -84,3 +84,16 @@
 1. Скачайте [`ha-shutter-card.js`](https://github.com/ananyevgv/ha-shutter-card/releases/latest)
 2. Скопируйте в `/config/www/ha-shutter-card.js`
 3. Перейдите в **Настройки → Панели → Ресурсы** → **Добавить ресурс**:
+
+### Основано на
+https://github.com/doanlong1412/gate-card
+https://github.com/samoswall/pic-shutter-card
+https://github.com/dermotduffy/advanced-camera-card
+
+---
+📄 License
+MIT License — free to use, modify, and distribute.
+If you find this useful, please ⭐ star the repo!
+---
+
+
