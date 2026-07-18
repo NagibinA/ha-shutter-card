@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.2.1 — Ламели появляются сверху вниз (position), наклон (tilt) управляет шириной
+// v1.2.2 — Исправлено: сброс tilt при перезагрузке карточки + корректное обновление ламелей
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -518,6 +518,9 @@ class ShutterCard extends HTMLElement {
   setConfig(config) {
     this._config = { ...SHUTTER_DEFAULT_CONFIG, ...config };
     this._haTheme = this._getHATheme();
+    // ✅ Сбрасываем tilt при загрузке конфигурации
+    this._leftTilt = 50;
+    this._rightTilt = 50;
     this._initialized = false;
     this._render();
   }
@@ -793,19 +796,19 @@ class ShutterCard extends HTMLElement {
     const overlay = this.shadowRoot?.querySelector(`.shutter-half.${side} .blind-overlay`);
     if (!overlay) return;
     
-    // Убираем трансформацию — ламели теперь управляются через visibleCount
     overlay.style.transform = 'none';
     overlay.style.background = 'transparent';
     
     const slats = overlay.querySelectorAll('.slat');
     if (slats.length === 0) return;
     
+    // ✅ Используем переданные значения
     const p = (pos !== undefined && pos !== null) ? Math.max(0, Math.min(100, pos)) : 0;
     const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 50;
     const numSlats = 24;
     const baseColor = blindColor || (this._haTheme === 'dark' ? 'rgba(60, 60, 80, 0.9)' : 'rgba(210, 210, 220, 0.9)');
     
-    // Количество видимых ламелей (сверху вниз)
+    // ✅ Количество видимых ламелей пересчитывается всегда
     const visibleCount = Math.round(numSlats * (1 - p / 100));
     
     // Параметры наклона
@@ -1009,23 +1012,37 @@ class ShutterCard extends HTMLElement {
     let leftTilt = 50, rightTilt = 50;
     
     if (isDual) {
+      // ✅ Всегда получаем свежие позиции
       const leftPos = this._getPosition(cfg.left_entity_id);
       const rightPos = this._getPosition(cfg.right_entity_id);
-      if (!this._isDragging) { this._leftPos = leftPos; this._rightPos = rightPos; }
+      this._leftPos = leftPos;
+      this._rightPos = rightPos;
+      
       leftTilt = this._getTilt(cfg.tilt_entity_left || cfg.left_entity_id);
       rightTilt = this._getTilt(cfg.tilt_entity_right || cfg.right_entity_id);
-      if (!this._isDragging) { this._leftTilt = leftTilt; this._rightTilt = rightTilt; }
+      
+      if (!tiltEnabled) {
+        leftTilt = 50;
+        rightTilt = 50;
+      }
+      
+      this._leftTilt = leftTilt;
+      this._rightTilt = rightTilt;
+      
       const leftState = this._state(cfg.left_entity_id);
       const rightState = this._state(cfg.right_entity_id);
-      leftStatus = this._getStatusText(this._leftPos, leftState);
-      rightStatus = this._getStatusText(this._rightPos, rightState);
+      leftStatus = this._getStatusText(leftPos, leftState);
+      rightStatus = this._getStatusText(rightPos, rightState);
     } else {
+      // ✅ Всегда получаем свежую позицию
       const pos = this._getPosition(cfg.entity_id);
-      if (!this._isDragging) this._leftPos = pos;
+      this._leftPos = pos;
+      
       const tilt = this._getTilt(cfg.tilt_entity_id || cfg.entity_id);
-      if (!this._isDragging) this._leftTilt = tilt;
+      this._leftTilt = tiltEnabled ? tilt : 50;
+      
       const state = this._state(cfg.entity_id);
-      singleStatus = this._getStatusText(this._leftPos, state);
+      singleStatus = this._getStatusText(pos, state);
     }
 
     const showCamera = cfg.show_camera !== false && cfg.camera_entity;
@@ -1118,6 +1135,7 @@ class ShutterCard extends HTMLElement {
         const effectiveLeftTilt = tiltEnabled ? this._leftTilt : 50;
         const effectiveRightTilt = tiltEnabled ? this._rightTilt : 50;
         
+        // ✅ Используем свежие позиции из переменных
         const leftSlats = this._generateSlats(this._leftPos, effectiveLeftTilt, leftColor, isDark);
         const rightSlats = this._generateSlats(this._rightPos, effectiveRightTilt, rightColor, isDark);
         
@@ -1144,6 +1162,8 @@ class ShutterCard extends HTMLElement {
       } else {
         const singleColor = cfg.color_blind || 'rgba(26,26,46,0.85)';
         const effectiveSingleTilt = tiltEnabled ? this._leftTilt : 50;
+        
+        // ✅ Используем свежую позицию из переменной
         const slats = this._generateSlats(this._leftPos, effectiveSingleTilt, singleColor, isDark);
         
         let bgImageHtml = '';
@@ -2177,7 +2197,7 @@ class ShutterCardEditor extends HTMLElement {
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.1 — Ламели появляются сверху вниз</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.2 — Исправлен сброс tilt и обновление ламелей</span>
         </div>
 
         <!-- Language -->
@@ -2862,7 +2882,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.2.1 %c Ламели появляются сверху вниз!',
+  '%c 🪟 Shutter Card %c v1.2.2 %c Исправлен сброс tilt и обновление ламелей при перезагрузке!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
