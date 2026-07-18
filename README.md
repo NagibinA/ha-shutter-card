@@ -1,7 +1,7 @@
 # HA Shutter Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-![version](https://img.shields.io/badge/version-1.2.1-blue)
+![version](https://img.shields.io/badge/version-1.2.2-blue)
 ![HA](https://img.shields.io/badge/Home%20Assistant-2023.1+-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -123,7 +123,7 @@ input_number:
 
 ---
 
-## 🎯 Новые возможности v1.2.1
+## 🎯 Новые возможности v1.2.2
 ###  🔄 Полноценное управление наклоном ламелей (Tilt)
 - Управление наклоном — теперь можно поворачивать ламели как у настоящих жалюзи
 - Кнопки управления — ↕ (поворот вверх/вниз) и ⟳ (сброс в 50%)
