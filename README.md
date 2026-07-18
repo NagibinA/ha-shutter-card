@@ -132,6 +132,10 @@ input_number:
 
 ---
 
+![Редактор HA Shutter Card](images/preview4.png)
+
+---
+
 
 ## 📦 Установка
 
