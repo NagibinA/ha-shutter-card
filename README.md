@@ -158,7 +158,7 @@ input_number:
 
 > Если кнопка не работает, добавьте вручную:
 > **HACS → Панель → ⋮ → Пользовательские репозитории**
-> → URL: `https://github.com/yourusername/ha-shutter-card` → Тип: **Панель** → Добавить
+> → URL: `https://github.com/NagibinA/ha-shutter-card` → Тип: **Панель** → Добавить
 
 **Шаг 2:** Найдите **HA Shutter Card** → **Установить**
 
@@ -168,7 +168,7 @@ input_number:
 
 ### Способ 2 — Ручная установка
 
-1. Скачайте [`ha-shutter-card.js`](https://github.com/yourusername/ha-shutter-card/releases/latest)
+1. Скачайте [`ha-shutter-card.js`](https://github.com/NagibinA/ha-shutter-card/releases/latest)
 2. Скопируйте в `/config/www/ha-shutter-card.js`
 3. Перейдите в **Настройки → Панели → Ресурсы** → **Добавить ресурс**:
 
