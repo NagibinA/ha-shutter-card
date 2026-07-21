@@ -169,7 +169,7 @@ input_number:
 ### Способ 2 — Ручная установка
 
 1. Скачайте [`ha-shutter-card.js`](https://github.com/NagibinA/ha-shutter-card/releases/latest)
-2. Скопируйте в `/config/www/ha-shutter-card.js`
+2. Скопируйте разархивированные файлы архива в `/config/www/ha-shutter-card`
 3. Перейдите в **Настройки → Панели → Ресурсы** → **Добавить ресурс**:
 
 | Параметр | Значение |
