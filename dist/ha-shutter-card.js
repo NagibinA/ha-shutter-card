@@ -1,7 +1,7 @@
 // ha-shutter-card.js
 // v1.2.5 — Полная локализация всех строк
 
-import { getLocalizedString, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from './translations/index.js';
+import { getLocalizedString, DEFAULT_LANGUAGE } from './translations/index.js';
 
 // ─── Theme colors ──────────────────────────────────────────────────────
 const HA_THEMES = {
@@ -138,18 +138,15 @@ function getShutterCSS(haTheme) {
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :host{display:block;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 
-/* ─── Card ─────────────────────────────────────────────────────────────── */
 .card{background:${bgGrad};border-radius:24px;border:1px solid ${theme.border};
   overflow:hidden;position:relative;box-shadow:${theme.card_shadow},inset 0 1px 0 rgba(255,255,255,0.04)}
 .card::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse at 70% 30%,rgba(0,150,255,0.04),transparent 60%)}
 .inner{position:relative;z-index:1;padding:18px 18px 14px}
 
-/* ─── Layout ───────────────────────────────────────────────────────────── */
 .shutter-layout{display:flex;flex-direction:column;gap:10px;position:relative}
 .shutter-row{display:flex;align-items:stretch;gap:10px;width:100%;flex-wrap:wrap}
 
-/* ─── Camera ───────────────────────────────────────────────────────────── */
 .camera-section{flex:1;position:relative;border-radius:12px;overflow:hidden;
   background:rgba(0,0,0,0.5);border:1px solid ${theme.border};
   min-height:120px;display:flex;align-items:center;justify-content:center;z-index:1;
@@ -162,7 +159,6 @@ function getShutterCSS(haTheme) {
 .camera-section.camera-medium{min-height:150px;max-height:220px}
 .camera-section.camera-large{min-height:200px;max-height:300px}
 
-/* ─── Overlays ─────────────────────────────────────────────────────────── */
 .camera-overlays{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:12px;overflow:hidden}
 .camera-overlay-top{position:absolute;top:0;left:0;right:0;padding:8px 10px;
   display:flex;justify-content:space-between;align-items:flex-start;
@@ -186,19 +182,13 @@ function getShutterCSS(haTheme) {
 .camera-overlay .recording-indicator .rec-dot{width:6px;height:6px;border-radius:50%;
   background:#ef4444;animation:pulse 0.8s ease-in-out infinite}
 
-/* ─── Фоновое изображение ─────────────────────────────────────────────── */
 .camera-section .shutter-bg-image{position:absolute;inset:0;z-index:0;
   background-size:cover;background-position:center;background-repeat:no-repeat;
   opacity:0.6;border-radius:12px}
 
-/* ─── Шторка и ламели ──────────────────────────────────────────────────── */
 .camera-shutters-overlay{position:absolute;inset:0;z-index:2;display:flex;pointer-events:none;border-radius:12px;overflow:hidden}
 .camera-shutters-overlay .shutter-half{flex:1;position:relative;overflow:hidden;pointer-events:auto}
-
-.camera-shutters-overlay .shutter-half .blind-overlay{position:absolute;inset:0;
-  pointer-events:none;
-  background: transparent;}
-
+.camera-shutters-overlay .shutter-half .blind-overlay{position:absolute;inset:0;pointer-events:none;background:transparent}
 .camera-shutters-overlay .shutter-half .blind-overlay .slat{position:absolute;left:2%;right:2%;
   border-radius:2px;transform-origin:center center;
   transition:transform 0.5s ease,top 0.5s ease,opacity 0.5s ease,height 0.5s ease;
@@ -211,7 +201,6 @@ function getShutterCSS(haTheme) {
   pointer-events:none}
 .camera-shutters-overlay .shutter-divider{width:2px;background:rgba(255,255,255,0.15);flex-shrink:0;z-index:3;pointer-events:none}
 
-/* ─── Tilt Controls ────────────────────────────────────────────────────── */
 .tilt-controls{display:flex;gap:4px;justify-content:center;padding:2px 0;order:2}
 .tilt-controls .tilt-btn{flex:1;max-width:50px;padding:4px 6px;border-radius:8px;
   border:1px solid ${theme.border};background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
@@ -224,7 +213,6 @@ function getShutterCSS(haTheme) {
 .tilt-controls .tilt-btn.tilt-up:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
 .tilt-controls .tilt-btn.tilt-down:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
 
-/* ─── Offline / Loading ────────────────────────────────────────────────── */
 .camera-section .camera-offline{display:flex;align-items:center;justify-content:center;height:100%;
   font-size:14px;color:rgba(255,255,255,0.3);flex-direction:column;gap:8px;width:100%;padding:20px}
 .camera-section .camera-offline .ico{font-size:32px}
@@ -233,13 +221,11 @@ function getShutterCSS(haTheme) {
 .camera-section .camera-loading .spinner{width:24px;height:24px;border:3px solid rgba(255,255,255,0.1);
   border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px}
 
-/* ─── Drag Handle ──────────────────────────────────────────────────────── */
 .drag-handle{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:6;
   width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.3);
   pointer-events:none;transition:opacity 0.3s}
 .camera-section:hover .drag-handle{opacity:0.8}
 
-/* ─── Header ───────────────────────────────────────────────────────────── */
 .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:6px}
 .header-left{display:flex;flex-direction:column;gap:2px}
 .header-title{font-size:20px;font-weight:700;color:${theme.text_primary};letter-spacing:-0.3px}
@@ -255,7 +241,6 @@ function getShutterCSS(haTheme) {
 .dot.red{background:var(--cv-closed,#ef4444);animation:pulse 0.8s ease-in-out infinite}
 .dot.off{background:#6b7280}
 
-/* ─── Progress Bar ────────────────────────────────────────────────────── */
 .progress-wrapper{width:100%;padding:2px 0;order:3}
 .progress-bar{width:100%;height:6px;border-radius:4px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
   overflow:hidden;position:relative;transition:opacity 0.3s}
@@ -268,7 +253,6 @@ function getShutterCSS(haTheme) {
   pointer-events:none;display:none}
 .progress-bar:hover .progress-label{display:block}
 
-/* ─── Controls ─────────────────────────────────────────────────────────── */
 .controls{display:flex;gap:6px;justify-content:center;padding:4px 0}
 .controls .control-btn{flex:1;max-width:80px;padding:10px 6px;border-radius:12px;border:1px solid ${theme.border};
   background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
@@ -282,7 +266,6 @@ function getShutterCSS(haTheme) {
 .controls .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
 .controls .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
-/* ─── Dual Mode ────────────────────────────────────────────────────────── */
 .controls-left,.controls-right{display:flex;flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
 .controls-left{order:0}
 .controls-right{order:2}
@@ -299,7 +282,6 @@ function getShutterCSS(haTheme) {
 .controls-left .control-btn.stop:hover,.controls-right .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
 .controls-left .control-btn.close:hover,.controls-right .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
-/* ─── Single Mode ──────────────────────────────────────────────────────── */
 .shutter-controls-left .shutter-row{flex-direction:row}
 .shutter-controls-left .controls{flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
 .shutter-controls-left .controls .control-btn{max-width:none;padding:10px 4px;flex:1;min-height:40px}
@@ -320,7 +302,6 @@ function getShutterCSS(haTheme) {
 .shutter-controls-bottom .controls .control-btn{max-width:80px}
 .shutter-controls-bottom .shutter-row{flex-direction:column}
 
-/* ─── Status Bar ───────────────────────────────────────────────────────── */
 .status-bar{display:flex;justify-content:space-between;align-items:center;
   padding:8px 12px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'};
   border-radius:8px;border:1px solid ${theme.border};flex-wrap:wrap;gap:4px;
@@ -329,32 +310,27 @@ function getShutterCSS(haTheme) {
 .status-left .state{font-weight:600;color:${theme.text_secondary}}
 .status-dual{display:flex;align-items:center;gap:12px;font-size:10px;color:${theme.text_muted}}
 
-/* ─── Badges ───────────────────────────────────────────────────────────── */
 .no-feedback-badge{display:inline-flex;align-items:center;gap:4px;
   font-size:9px;color:${theme.text_muted};padding:2px 8px;
   border-radius:10px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'};
   border:1px solid ${theme.border}}
 
-/* ─── Animations ───────────────────────────────────────────────────────── */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
 @keyframes progressPulse{0%,100%{opacity:1}50%{opacity:0.6}}
 
-/* ─── Mobile ───────────────────────────────────────────────────────────── */
 @media(max-width:500px){
   .inner{padding:12px}
   .header-title{font-size:17px}
   .shutter-layout{gap:8px}
   .shutter-row{flex-direction:column !important;gap:8px !important;align-items:stretch !important}
   .camera-section{width:100% !important;flex:none !important;min-height:130px !important;max-height:200px !important;order:2 !important}
-
   .controls-left,.controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;padding:0 !important}
   .controls-left{order:1 !important;justify-content:flex-start !important}
   .controls-right{order:3 !important;justify-content:flex-end !important}
   .controls-left .control-btn,.controls-right .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .controls-left .control-btn span,.controls-right .control-btn span{display:block !important;font-size:7px !important}
-
   .shutter-controls-dual .shutter-row{flex-direction:column !important}
   .shutter-controls-dual .controls-left,.shutter-controls-dual .controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important}
   .shutter-controls-dual .controls-left{justify-content:flex-start !important}
@@ -365,32 +341,25 @@ function getShutterCSS(haTheme) {
   .shutter-controls-dual .shutter-row .camera-section{order:2 !important}
   .shutter-controls-dual .shutter-row .controls-left{order:1 !important}
   .shutter-controls-dual .shutter-row .controls-right{order:3 !important}
-
   .shutter-controls-left .shutter-row,.shutter-controls-right .shutter-row{flex-direction:column !important}
   .shutter-controls-left .controls,.shutter-controls-right .controls{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;justify-content:center !important}
   .shutter-controls-left .controls .control-btn,.shutter-controls-right .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .shutter-controls-left .controls .control-btn .ico,.shutter-controls-right .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .shutter-controls-left .controls .control-btn span,.shutter-controls-right .controls .control-btn span{display:block !important;font-size:7px !important}
-
   .shutter-controls-top .controls,.shutter-controls-bottom .controls{flex-direction:row !important;width:100% !important;gap:4px !important;justify-content:center !important}
   .shutter-controls-top .controls .control-btn,.shutter-controls-bottom .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .shutter-controls-top .controls .control-btn .ico,.shutter-controls-bottom .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .shutter-controls-top .controls .control-btn span,.shutter-controls-bottom .controls .control-btn span{display:block !important;font-size:7px !important}
-
   .progress-wrapper{width:100% !important;order:4 !important}
   .progress-wrapper .progress-bar{height:4px !important}
-
   .status-bar{flex-wrap:wrap !important;justify-content:center !important;padding:6px 10px !important;order:5 !important}
   .status-dual{flex-wrap:wrap !important;justify-content:center !important;gap:4px !important;font-size:9px !important}
   .status-left{font-size:10px !important}
-
   .header{flex-direction:column !important;align-items:stretch !important;gap:4px !important;margin-bottom:8px !important}
   .header-right{align-items:flex-start !important;gap:2px !important}
   .header-status{font-size:10px !important;padding:2px 10px !important}
   .header-greet{font-size:11px !important}
-
   .camera-section.camera-small,.camera-section.camera-medium,.camera-section.camera-large{min-height:120px !important;max-height:180px !important}
-
   .tilt-controls{order:3 !important;width:100% !important}
   .tilt-controls .tilt-btn{max-width:60px !important;padding:4px 8px !important;font-size:8px !important}
   .tilt-controls .tilt-btn .ico{font-size:14px !important}
@@ -488,6 +457,17 @@ class ShutterCard extends HTMLElement {
           no_feedback: this._('ui.labels.no_feedback'),
           memory: this._('ui.labels.memory'),
           no_camera: this._('ui.labels.no_camera'),
+          seconds: this._('ui.labels.seconds'),
+          minutes: this._('ui.labels.minutes'),
+        };
+      },
+      get overlay() {
+        return {
+          live: this._('ui.overlay.live'),
+          motion_on: this._('ui.overlay.motion_on'),
+          motion_off: this._('ui.overlay.motion_off'),
+          recording_on: this._('ui.overlay.recording_on'),
+          recording_off: this._('ui.overlay.recording_off'),
         };
       },
       get card() {
@@ -1263,18 +1243,18 @@ class ShutterCard extends HTMLElement {
           ${showLive ? `
             <div class="badge">
               <span class="dot red"></span>
-              ${t.labels.live}
+              ${t.overlay.live}
             </div>
           ` : ''}
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;${!showLive ? 'margin-left:auto;' : ''}">
             ${cfg.camera_show_motion !== false ? `
               <div class="badge" style="${isMotion ? 'border:1px solid #f59e0b;' : 'opacity:0.5;'}">
-                ${isMotion ? '🔴' : '⚪'} ${t.labels.motion}
+                ${isMotion ? t.overlay.motion_on : t.overlay.motion_off}
               </div>
             ` : ''}
             ${cfg.camera_show_recording !== false ? `
               <div class="badge" style="${isRecording ? 'border:1px solid #ef4444;' : 'opacity:0.5;'}">
-                ${isRecording ? '<span class="recording-indicator"><span class="rec-dot"></span> REC</span>' : '⏹ ' + t.labels.recording}
+                ${isRecording ? '<span class="recording-indicator"><span class="rec-dot"></span> ' + t.overlay.recording_on + '</span>' : '⏹ ' + t.overlay.recording_off}
               </div>
             ` : ''}
             ${noFeedbackBadge}
@@ -1642,17 +1622,17 @@ class ShutterCard extends HTMLElement {
         if (text.includes(this.t.labels.recording) || text.includes('REC') || text.includes('recording')) recordingBadge = badge;
       });
       if (motionBadge && cfg.camera_show_motion !== false) {
-        motionBadge.textContent = isMotion ? `🔴 ${this.t.labels.motion}` : `⚪ ${this.t.labels.motion}`;
+        motionBadge.textContent = isMotion ? this.t.overlay.motion_on : this.t.overlay.motion_off;
         motionBadge.style.border = isMotion ? '1px solid #f59e0b' : 'none';
         motionBadge.style.opacity = isMotion ? '1' : '0.5';
       }
       if (recordingBadge && cfg.camera_show_recording !== false) {
         if (isRecording) {
-          recordingBadge.innerHTML = '<span class="recording-indicator"><span class="rec-dot"></span> REC</span>';
+          recordingBadge.innerHTML = '<span class="recording-indicator"><span class="rec-dot"></span> ' + this.t.overlay.recording_on + '</span>';
           recordingBadge.style.border = '1px solid #ef4444';
           recordingBadge.style.opacity = '1';
         } else {
-          recordingBadge.textContent = `⏹ ${this.t.labels.recording}`;
+          recordingBadge.textContent = '⏹ ' + this.t.overlay.recording_off;
           recordingBadge.style.border = 'none';
           recordingBadge.style.opacity = '0.5';
         }
@@ -1944,6 +1924,19 @@ class ShutterCardEditor extends HTMLElement {
     const get = (key, params = {}) => getLocalizedString(lang, key, params);
     return {
       _: get,
+      get labels() {
+        return {
+          seconds: get('ui.labels.seconds'),
+          minutes: get('ui.labels.minutes'),
+          tilt: get('ui.labels.tilt'),
+        };
+      },
+      get dual() {
+        return {
+          left: get('ui.dual.left'),
+          right: get('ui.dual.right'),
+        };
+      },
       get sections() {
         return {
           language: get('editor.sections.language'),
@@ -1977,6 +1970,7 @@ class ShutterCardEditor extends HTMLElement {
           motion_entity: get('editor.fields.motion_entity'),
           recording_entity: get('editor.fields.recording_entity'),
           tilt_entity: get('editor.fields.tilt_entity'),
+          tilt_entity_hint: get('editor.fields.tilt_entity_hint'),
           tilt_visual: get('editor.fields.tilt_visual'),
           tilt_visual_desc: get('editor.fields.tilt_visual_desc'),
           tilt_controls: get('editor.fields.tilt_controls'),
@@ -1990,8 +1984,11 @@ class ShutterCardEditor extends HTMLElement {
           refresh_interval: get('editor.fields.refresh_interval'),
           refresh_interval_desc: get('editor.fields.refresh_interval_desc'),
           show_timestamp: get('editor.fields.show_timestamp'),
+          show_timestamp_desc: get('editor.fields.show_timestamp_desc'),
           show_motion: get('editor.fields.show_motion'),
+          show_motion_desc: get('editor.fields.show_motion_desc'),
           show_recording: get('editor.fields.show_recording'),
+          show_recording_desc: get('editor.fields.show_recording_desc'),
           controls_position: get('editor.fields.controls_position'),
           controls_bottom: get('editor.fields.controls_bottom'),
           controls_bottom_sub: get('editor.fields.controls_bottom_sub'),
@@ -2045,6 +2042,7 @@ class ShutterCardEditor extends HTMLElement {
       },
       get info() {
         return {
+          overlay_hint: get('editor.info.overlay_hint'),
           dual_layout: get('editor.info.dual_layout'),
           tilt_info: get('editor.info.tilt_info'),
           bg_image_hint: get('editor.info.bg_image_hint'),
@@ -2161,24 +2159,11 @@ class ShutterCardEditor extends HTMLElement {
     const controlsPos = cfg.controls_position || 'bottom';
     const noFeedback = cfg.no_feedback || false;
     const memoryType = cfg.memory_type || 'localstorage';
-    const showProgressBar = cfg.show_progress_bar !== false;
     const progressStyle = cfg.progress_bar_style || 'gradient';
-    const showTiltControls = cfg.show_tilt_controls || false;
-    const showTiltVisual = cfg.show_tilt_visual !== false;
 
     const languages = {
       en: { name: 'English', flag: 'gb' },
       ru: { name: 'Русский', flag: 'ru' },
-      de: { name: 'Deutsch', flag: 'de' },
-      fr: { name: 'Français', flag: 'fr' },
-      it: { name: 'Italiano', flag: 'it' },
-      nl: { name: 'Nederlands', flag: 'nl' },
-      pl: { name: 'Polski', flag: 'pl' },
-      pt: { name: 'Português', flag: 'pt' },
-      sv: { name: 'Svenska', flag: 'se' },
-      hu: { name: 'Magyar', flag: 'hu' },
-      cs: { name: 'Čeština', flag: 'cz' },
-      sl: { name: 'Slovenščina', flag: 'si' },
     };
 
     this.shadowRoot.innerHTML = `
@@ -2432,15 +2417,9 @@ class ShutterCardEditor extends HTMLElement {
             
             <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.fields.theme}</label>
             <div class="theme-grid">
-              <div class="theme-btn ${theme === 'auto' ? 'on' : ''}" data-theme="auto">
-                ${t.fields.theme_auto}
-              </div>
-              <div class="theme-btn ${theme === 'dark' ? 'on' : ''}" data-theme="dark">
-                ${t.fields.theme_dark}
-              </div>
-              <div class="theme-btn ${theme === 'light' ? 'on' : ''}" data-theme="light">
-                ${t.fields.theme_light}
-              </div>
+              <div class="theme-btn ${theme === 'auto' ? 'on' : ''}" data-theme="auto">${t.fields.theme_auto}</div>
+              <div class="theme-btn ${theme === 'dark' ? 'on' : ''}" data-theme="dark">${t.fields.theme_dark}</div>
+              <div class="theme-btn ${theme === 'light' ? 'on' : ''}" data-theme="light">${t.fields.theme_light}</div>
             </div>
           </div>
         </div>
@@ -2484,15 +2463,16 @@ class ShutterCardEditor extends HTMLElement {
                 </div>
               </div>
               <div class="tilt-entity-row">
-                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ ${t.labels?.tilt || 'Tilt'}</div>
+                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ ${t.labels.tilt}</div>
                 ${this._entityField('tilt_entity_id', t.fields.tilt_entity, 'cover')}
+                <div style="font-size:10px;color:var(--secondary-text-color);margin-top:2px;">${t.fields.tilt_entity_hint}</div>
               </div>
             </div>
 
             <div class="dual-entities" id="dual-entities">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <div>
-                  ${this._entityField('left_entity_id', t.fields.entity + ' (' + t.dual?.left + ')', 'cover')}
+                  ${this._entityField('left_entity_id', t.fields.entity + ' (' + t.dual.left + ')', 'cover')}
                   <div class="row">
                     <label>${t.fields.shutter_color_left}</label>
                     <div class="color-blind-row">
@@ -2511,11 +2491,11 @@ class ShutterCardEditor extends HTMLElement {
                     </div>
                   </div>
                   <div class="tilt-entity-row">
-                    ${this._entityField('tilt_entity_left', t.fields.tilt_entity + ' (' + t.dual?.left + ')', 'cover')}
+                    ${this._entityField('tilt_entity_left', t.fields.tilt_entity + ' (' + t.dual.left + ')', 'cover')}
                   </div>
                 </div>
                 <div>
-                  ${this._entityField('right_entity_id', t.fields.entity + ' (' + t.dual?.right + ')', 'cover')}
+                  ${this._entityField('right_entity_id', t.fields.entity + ' (' + t.dual.right + ')', 'cover')}
                   <div class="row">
                     <label>${t.fields.shutter_color_right}</label>
                     <div class="color-blind-row">
@@ -2534,7 +2514,7 @@ class ShutterCardEditor extends HTMLElement {
                     </div>
                   </div>
                   <div class="tilt-entity-row">
-                    ${this._entityField('tilt_entity_right', t.fields.tilt_entity + ' (' + t.dual?.right + ')', 'cover')}
+                    ${this._entityField('tilt_entity_right', t.fields.tilt_entity + ' (' + t.dual.right + ')', 'cover')}
                   </div>
                 </div>
               </div>
@@ -2585,8 +2565,8 @@ class ShutterCardEditor extends HTMLElement {
                   min="10" max="3600" step="10" 
                   value="${refreshInterval}" 
                   style="width:100px;text-align:center;"/>
-                <span style="font-size:12px;color:var(--secondary-text-color);">сек</span>
-                <span style="font-size:10px;color:var(--secondary-text-color);opacity:0.6;">(мин: ${Math.round(refreshInterval/60)})</span>
+                <span style="font-size:12px;color:var(--secondary-text-color);">${t.labels.seconds}</span>
+                <span style="font-size:10px;color:var(--secondary-text-color);opacity:0.6;">(${t.labels.minutes}: ${Math.round(refreshInterval/60)})</span>
               </div>
               <div style="font-size:11px;color:var(--secondary-text-color);margin-top:4px;">${t.fields.refresh_interval_desc}</div>
             </div>
@@ -2600,9 +2580,10 @@ class ShutterCardEditor extends HTMLElement {
             <span class="acc-arrow" id="arrow-overlay">${this._open.overlay ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-overlay" style="display:${this._open.overlay ? 'block' : 'none'}">
-            ${this._toggleSwitch('camera_show_timestamp', t.fields.show_timestamp, '')}
-            ${this._toggleSwitch('camera_show_motion', t.fields.show_motion, '')}
-            ${this._toggleSwitch('camera_show_recording', t.fields.show_recording, '')}
+            <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;">${t.info.overlay_hint}</div>
+            ${this._toggleSwitch('camera_show_timestamp', t.fields.show_timestamp, t.fields.show_timestamp_desc)}
+            ${this._toggleSwitch('camera_show_motion', t.fields.show_motion, t.fields.show_motion_desc)}
+            ${this._toggleSwitch('camera_show_recording', t.fields.show_recording, t.fields.show_recording_desc)}
           </div>
         </div>
 
@@ -2925,7 +2906,7 @@ class ShutterCardEditor extends HTMLElement {
         this._config.camera_refresh_interval = Math.max(10, Math.min(3600, val));
         const minSpan = refreshInterval.parentElement?.querySelector('span:last-child');
         if (minSpan) {
-          minSpan.textContent = `(мин: ${Math.round(this._config.camera_refresh_interval/60)})`;
+          minSpan.textContent = `(${this.t.labels.minutes}: ${Math.round(this._config.camera_refresh_interval/60)})`;
         }
         this._fire();
       });
