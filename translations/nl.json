@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Nederlands",
+    "flag": "nl"
+  },
+  "ui": {
+    "card": {
+      "title": "Rolluik",
+      "subtitle": "Bediening",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "OPENEN",
+      "closing": "SLUITEN",
+      "stopped": "GESTOPT",
+      "open": "OPEN",
+      "closed": "GESLOTEN",
+      "moving": "In beweging...",
+      "partial": "GESTOPT {position}%"
+    },
+    "buttons": {
+      "open": "Openen",
+      "stop": "Stop",
+      "close": "Sluiten"
+    },
+    "labels": {
+      "position": "Positie",
+      "camera": "Camera",
+      "live": "LIVE",
+      "offline": "Offline",
+      "loading": "Laden...",
+      "motion": "Beweging",
+      "recording": "Opname",
+      "tilt": "Kanteling",
+      "left": "Links",
+      "right": "Rechts",
+      "no_feedback": "📡 Geen feedback",
+      "memory": "💾",
+      "no_camera": "Geen camera"
+    },
+    "greetings": {
+      "night": "🌙 Goedenacht",
+      "morning": "🌅 Goedemorgen",
+      "afternoon": "☀️ Goedemiddag",
+      "evening": "🌆 Goedenavond"
+    },
+    "dual": {
+      "left": "Links",
+      "right": "Rechts"
+    },
+    "feedback": {
+      "no_feedback": "📡 Geen feedback",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Kantel omhoog",
+      "down": "Kantel omlaag",
+      "info_0": "0% = volledig gesloten (lamellen strak tegen elkaar)",
+      "info_50": "50% = half geopend",
+      "info_100": "100% = volledig geopend (lamellen op rand)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Taal",
+      "title": "📝 Titel en thema",
+      "entities": "🔌 Entiteiten",
+      "tilt": "↕ Kantelbediening",
+      "camera": "📷 Camera",
+      "overlay": "🎬 Overlay",
+      "display": "👁 Weergave",
+      "colors": "🎨 Kleuren",
+      "background": "🌈 Achtergrond",
+      "advanced": "⚙️ Geavanceerd"
+    },
+    "fields": {
+      "title": "Kaarttitel",
+      "subtitle": "Ondertitel",
+      "owner_name": "Eigenaarsnaam",
+      "theme": "Thema",
+      "theme_auto": "🌓 Auto (systeem)",
+      "theme_dark": "🌙 Donker",
+      "theme_light": "☀️ Licht",
+      "mode": "Modus",
+      "mode_single": "Enkel",
+      "mode_single_sub": "Eén rolluik",
+      "mode_dual": "Dubbel",
+      "mode_dual_sub": "Links + Rechts",
+      "entity": "Rolluik entiteit",
+      "camera_entity": "Camera entiteit",
+      "motion_entity": "Bewegingssensor",
+      "recording_entity": "Opnamestatus",
+      "tilt_entity": "Kantel entiteit (optioneel)",
+      "tilt_visual": "Kantelvisualisatie inschakelen",
+      "tilt_visual_desc": "Uitgeschakeld — lamellen altijd op 0% (volledig gesloten)",
+      "tilt_controls": "Kantelknoppen tonen",
+      "tilt_controls_desc": "↕ Knoppen onder rolluik (alleen als kanteling is ingeschakeld)",
+      "camera_size": "Camergrootte",
+      "camera_size_small": "Klein",
+      "camera_size_medium": "Middel",
+      "camera_size_large": "Groot",
+      "camera_show": "Camera tonen",
+      "camera_show_desc": "Camera op kaart weergeven",
+      "refresh_interval": "Vernieuwingsinterval",
+      "refresh_interval_desc": "Hoe vaak camerabeeld vernieuwen (sec)",
+      "show_timestamp": "Tijdstempel tonen",
+      "show_motion": "Bewegingsindicator",
+      "show_recording": "Opname-indicator",
+      "controls_position": "Bedieningspositie",
+      "controls_bottom": "⬇️ Onder",
+      "controls_bottom_sub": "Horizontaal",
+      "controls_top": "⬆️ Boven",
+      "controls_top_sub": "Horizontaal",
+      "controls_left": "⬅️ Links",
+      "controls_left_sub": "Verticaal",
+      "controls_right": "➡️ Rechts",
+      "controls_right_sub": "Verticaal",
+      "show_greeting": "Groet tonen",
+      "show_greeting_desc": "Tijd-van-de-dag groet tonen",
+      "show_position": "Positie tonen",
+      "show_controls": "Bediening tonen",
+      "show_status": "Status tonen",
+      "invert_position": "🔄 Positie inverteren",
+      "invert_position_desc": "Positiewaarde inverteren (100% = gesloten)",
+      "shutter_color": "Rolluikkleur (RGBA)",
+      "shutter_color_left": "Rolluikkleur (links)",
+      "shutter_color_right": "Rolluikkleur (rechts)",
+      "opacity": "Dekkracht:",
+      "progress_bar": "Voortgangsbalk tonen",
+      "progress_bar_desc": "Geanimeerde voortgangsbalk onder rolluik tonen",
+      "progress_style": "Voortgangsbalk-stijl",
+      "progress_gradient": "🌈 Verloop",
+      "progress_solid": "⬛ Effen",
+      "no_feedback": "Feedback-vrije modus inschakelen",
+      "no_feedback_desc": "Voor apparaten zonder positie-sensor",
+      "memory_type": "Opslagmethode",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number voor positie-opslag",
+      "input_number_left": "Input number (links)",
+      "input_number_right": "Input number (rechts)",
+      "bg_image": "Achtergrondafbeelding URL",
+      "bg_image_desc": "Getoond als achtergrond onder rolluik, alleen wanneer camera uit is",
+      "bg_preset": "Verloop voorinstelling",
+      "bg_alpha": "Dekkracht",
+      "bg_blur": "Vervaging",
+      "bg_custom_color1": "Kleur 1",
+      "bg_custom_color2": "Kleur 2"
+    },
+    "colors": {
+      "accent": "Accentkleur",
+      "text": "Tekstkleur",
+      "open": "Open kleur",
+      "closed": "Gesloten kleur",
+      "reset": "↩ Kleuren herstellen"
+    },
+    "info": {
+      "dual_layout": "📌 In \"Dubbel\"-modus zijn de bedieningen gepositioneerd:\n⬅️ Links — voor linker rolluik\n➡️ Rechts — voor rechter rolluik",
+      "tilt_info": "**Nieuwe kantellogica:**\n0% = volledig gesloten (lamellen strak tegen elkaar)\n50% = half geopend\n100% = volledig geopend (lamellen op rand)",
+      "bg_image_hint": "Afbeelding wordt getoond als achtergrond onder rolluik, alleen wanneer camera is uitgeschakeld.",
+      "no_feedback_hint": "Voor apparaten zonder positie-sensor",
+      "version": "v1.2.4 — Hersteld: volledige hercreatie van lamellen bij update"
+    }
+  }
+}
