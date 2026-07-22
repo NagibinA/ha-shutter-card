@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Magyar",
+    "flag": "hu"
+  },
+  "ui": {
+    "card": {
+      "title": "Redőny",
+      "subtitle": "Vezérlés",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "NYITÁS",
+      "closing": "ZÁRÁS",
+      "stopped": "MEGÁLLÍTVA",
+      "open": "NYITVA",
+      "closed": "ZÁRVA",
+      "moving": "Mozog...",
+      "partial": "MEGÁLLÍTVA {position}%"
+    },
+    "buttons": {
+      "open": "Nyitás",
+      "stop": "Megállít",
+      "close": "Zárás"
+    },
+    "labels": {
+      "position": "Pozíció",
+      "camera": "Kamera",
+      "live": "ÉLŐ",
+      "offline": "Offline",
+      "loading": "Betöltés...",
+      "motion": "Mozgás",
+      "recording": "Felvétel",
+      "tilt": "Döntés",
+      "left": "Bal",
+      "right": "Jobb",
+      "no_feedback": "📡 Nincs visszajelzés",
+      "memory": "💾",
+      "no_camera": "Nincs kamera"
+    },
+    "greetings": {
+      "night": "🌙 Jó éjszakát",
+      "morning": "🌅 Jó reggelt",
+      "afternoon": "☀️ Jó napot",
+      "evening": "🌆 Jó estét"
+    },
+    "dual": {
+      "left": "Bal",
+      "right": "Jobb"
+    },
+    "feedback": {
+      "no_feedback": "📡 Nincs visszajelzés",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Döntés felfelé",
+      "down": "Döntés lefelé",
+      "info_0": "0% = teljesen zárt (lamellák szorosan egymáshoz)",
+      "info_50": "50% = félig nyitott",
+      "info_100": "100% = teljesen nyitott (lamellák élen)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Nyelv",
+      "title": "📝 Cím és téma",
+      "entities": "🔌 Entitások",
+      "tilt": "↕ Döntésvezérlés",
+      "camera": "📷 Kamera",
+      "overlay": "🎬 Átfedés",
+      "display": "👁 Megjelenítés",
+      "colors": "🎨 Színek",
+      "background": "🌈 Háttér",
+      "advanced": "⚙️ Speciális"
+    },
+    "fields": {
+      "title": "Kártya címe",
+      "subtitle": "Alcím",
+      "owner_name": "Tulajdonos neve",
+      "theme": "Téma",
+      "theme_auto": "🌓 Auto (rendszer)",
+      "theme_dark": "🌙 Sötét",
+      "theme_light": "☀️ Világos",
+      "mode": "Mód",
+      "mode_single": "Egyedi",
+      "mode_single_sub": "Egy redőny",
+      "mode_dual": "Dupla",
+      "mode_dual_sub": "Bal + Jobb",
+      "entity": "Redőny entitás",
+      "camera_entity": "Kamera entitás",
+      "motion_entity": "Mozgásérzékelő",
+      "recording_entity": "Felvételi állapot",
+      "tilt_entity": "Döntési entitás (opcionális)",
+      "tilt_visual": "Döntés vizualizáció engedélyezése",
+      "tilt_visual_desc": "Kikapcsolva — lamellák mindig 0%-on (teljesen zárva)",
+      "tilt_controls": "Döntési gombok mutatása",
+      "tilt_controls_desc": "↕ Gombok a redőny alatt (csak ha a döntés engedélyezve van)",
+      "camera_size": "Kamera méret",
+      "camera_size_small": "Kicsi",
+      "camera_size_medium": "Közepes",
+      "camera_size_large": "Nagy",
+      "camera_show": "Kamera mutatása",
+      "camera_show_desc": "Kamera megjelenítése a kártyán",
+      "refresh_interval": "Frissítési intervallum",
+      "refresh_interval_desc": "Milyen gyakran frissüljön a kamera (mp)",
+      "show_timestamp": "Időbélyeg mutatása",
+      "show_motion": "Mozgásjelző",
+      "show_recording": "Felvételjelző",
+      "controls_position": "Vezérlők pozíciója",
+      "controls_bottom": "⬇️ Alul",
+      "controls_bottom_sub": "Vízszintes",
+      "controls_top": "⬆️ Felül",
+      "controls_top_sub": "Vízszintes",
+      "controls_left": "⬅️ Balra",
+      "controls_left_sub": "Függőleges",
+      "controls_right": "➡️ Jobbra",
+      "controls_right_sub": "Függőleges",
+      "show_greeting": "Köszöntés mutatása",
+      "show_greeting_desc": "Napszaknak megfelelő köszöntés mutatása",
+      "show_position": "Pozíció mutatása",
+      "show_controls": "Vezérlés mutatása",
+      "show_status": "Állapot mutatása",
+      "invert_position": "🔄 Pozíció invertálása",
+      "invert_position_desc": "Pozíció érték invertálása (100% = zárva)",
+      "shutter_color": "Redőny színe (RGBA)",
+      "shutter_color_left": "Redőny színe (bal)",
+      "shutter_color_right": "Redőny színe (jobb)",
+      "opacity": "Átlátszóság:",
+      "progress_bar": "Folyamatjelző mutatása",
+      "progress_bar_desc": "Animált folyamatjelző mutatása a redőny alatt",
+      "progress_style": "Folyamatjelző stílus",
+      "progress_gradient": "🌈 Átmenet",
+      "progress_solid": "⬛ Egységes",
+      "no_feedback": "Visszajelzés nélküli mód engedélyezése",
+      "no_feedback_desc": "Pozícióérzékelő nélküli eszközökhöz",
+      "memory_type": "Tárolási módszer",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number a pozíció tárolásához",
+      "input_number_left": "Input number (bal)",
+      "input_number_right": "Input number (jobb)",
+      "bg_image": "Háttérkép URL",
+      "bg_image_desc": "Háttérként jelenik meg a redőny alatt, csak ha a kamera ki van kapcsolva",
+      "bg_preset": "Átmenet előbeállítás",
+      "bg_alpha": "Átlátszóság",
+      "bg_blur": "Elmosódás",
+      "bg_custom_color1": "Szín 1",
+      "bg_custom_color2": "Szín 2"
+    },
+    "colors": {
+      "accent": "Kiemelő szín",
+      "text": "Szöveg szín",
+      "open": "Nyitva szín",
+      "closed": "Zárva szín",
+      "reset": "↩ Színek visszaállítása"
+    },
+    "info": {
+      "dual_layout": "📌 \"Dupla\" módban a vezérlők pozíciója:\n⬅️ Bal — a bal redőnyhöz\n➡️ Jobb — a jobb redőnyhöz",
+      "tilt_info": "**Új döntési logika:**\n0% = teljesen zárt (lamellák szorosan egymáshoz)\n50% = félig nyitott\n100% = teljesen nyitott (lamellák élen)",
+      "bg_image_hint": "A kép háttérként jelenik meg a redőny alatt, csak ha a kamera ki van kapcsolva.",
+      "no_feedback_hint": "Pozícióérzékelő nélküli eszközökhöz",
+      "version": "v1.2.4 — Javítva: lamellák teljes újralétrehozása frissítéskor"
+    }
+  }
+}
