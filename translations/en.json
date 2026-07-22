@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "English",
+    "flag": "gb"
+  },
+  "ui": {
+    "card": {
+      "title": "Shutter",
+      "subtitle": "Control",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "OPENING",
+      "closing": "CLOSING",
+      "stopped": "STOPPED",
+      "open": "OPEN",
+      "closed": "CLOSED",
+      "moving": "Moving...",
+      "partial": "STOPPED {position}%"
+    },
+    "buttons": {
+      "open": "Open",
+      "stop": "Stop",
+      "close": "Close"
+    },
+    "labels": {
+      "position": "Position",
+      "camera": "Camera",
+      "live": "LIVE",
+      "offline": "Offline",
+      "loading": "Loading...",
+      "motion": "Motion",
+      "recording": "Recording",
+      "tilt": "Tilt",
+      "left": "Left",
+      "right": "Right",
+      "no_feedback": "📡 No feedback",
+      "memory": "💾",
+      "no_camera": "No camera"
+    },
+    "greetings": {
+      "night": "🌙 Good night",
+      "morning": "🌅 Good morning",
+      "afternoon": "☀️ Good afternoon",
+      "evening": "🌆 Good evening"
+    },
+    "dual": {
+      "left": "Left",
+      "right": "Right"
+    },
+    "feedback": {
+      "no_feedback": "📡 No feedback",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Tilt up",
+      "down": "Tilt down",
+      "info_0": "0% = fully closed (slats tightly together)",
+      "info_50": "50% = half open",
+      "info_100": "100% = fully open (slats on edge)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Language",
+      "title": "📝 Title & Theme",
+      "entities": "🔌 Entities",
+      "tilt": "↕ Tilt Control",
+      "camera": "📷 Camera",
+      "overlay": "🎬 Overlay",
+      "display": "👁 Display",
+      "colors": "🎨 Colors",
+      "background": "🌈 Background",
+      "advanced": "⚙️ Advanced"
+    },
+    "fields": {
+      "title": "Card title",
+      "subtitle": "Subtitle",
+      "owner_name": "Owner name",
+      "theme": "Theme",
+      "theme_auto": "🌓 Auto (system)",
+      "theme_dark": "🌙 Dark",
+      "theme_light": "☀️ Light",
+      "mode": "Mode",
+      "mode_single": "Single",
+      "mode_single_sub": "One shutter",
+      "mode_dual": "Dual",
+      "mode_dual_sub": "Left + Right",
+      "entity": "Shutter entity",
+      "camera_entity": "Camera entity",
+      "motion_entity": "Motion sensor",
+      "recording_entity": "Recording status",
+      "tilt_entity": "Tilt entity (optional)",
+      "tilt_visual": "Enable tilt visual",
+      "tilt_visual_desc": "Disabled — slats always at 0% (fully closed)",
+      "tilt_controls": "Show tilt buttons",
+      "tilt_controls_desc": "↕ buttons under the shutter (only if tilt is enabled)",
+      "camera_size": "Camera size",
+      "camera_size_small": "Small",
+      "camera_size_medium": "Medium",
+      "camera_size_large": "Large",
+      "camera_show": "Show camera",
+      "camera_show_desc": "Display camera on card",
+      "refresh_interval": "Refresh interval",
+      "refresh_interval_desc": "How often to refresh camera frame (sec)",
+      "show_timestamp": "Show timestamp",
+      "show_motion": "Motion indicator",
+      "show_recording": "Recording indicator",
+      "controls_position": "Controls position",
+      "controls_bottom": "⬇️ Bottom",
+      "controls_bottom_sub": "Horizontal",
+      "controls_top": "⬆️ Top",
+      "controls_top_sub": "Horizontal",
+      "controls_left": "⬅️ Left",
+      "controls_left_sub": "Vertical",
+      "controls_right": "➡️ Right",
+      "controls_right_sub": "Vertical",
+      "show_greeting": "Show greeting",
+      "show_greeting_desc": "Show time-of-day greeting",
+      "show_position": "Show position",
+      "show_controls": "Show controls",
+      "show_status": "Show status",
+      "invert_position": "🔄 Invert position",
+      "invert_position_desc": "Invert position value (100% = closed)",
+      "shutter_color": "Shutter color (RGBA)",
+      "shutter_color_left": "Shutter color (left)",
+      "shutter_color_right": "Shutter color (right)",
+      "opacity": "Opacity:",
+      "progress_bar": "Show progress bar",
+      "progress_bar_desc": "Display animated progress bar under shutter",
+      "progress_style": "Progress bar style",
+      "progress_gradient": "🌈 Gradient",
+      "progress_solid": "⬛ Solid",
+      "no_feedback": "Enable no-feedback mode",
+      "no_feedback_desc": "For devices without position sensor",
+      "memory_type": "Storage method",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number entity for position storage",
+      "input_number_left": "Input number (left)",
+      "input_number_right": "Input number (right)",
+      "bg_image": "Background image URL",
+      "bg_image_desc": "Shown as background under the shutter, only when camera is off",
+      "bg_preset": "Gradient preset",
+      "bg_alpha": "Opacity",
+      "bg_blur": "Blur",
+      "bg_custom_color1": "Color 1",
+      "bg_custom_color2": "Color 2"
+    },
+    "colors": {
+      "accent": "Accent color",
+      "text": "Text color",
+      "open": "Open color",
+      "closed": "Closed color",
+      "reset": "↩ Reset colors"
+    },
+    "info": {
+      "dual_layout": "📌 In \"Dual\" mode, controls are positioned:\n⬅️ Left — for left shutter\n➡️ Right — for right shutter",
+      "tilt_info": "**New tilt logic:**\n0% = fully closed (slats tightly together)\n50% = half open\n100% = fully open (slats on edge)",
+      "bg_image_hint": "Image will be shown as background under the shutter, only when camera is disabled.",
+      "no_feedback_hint": "For devices without position sensor",
+      "version": "v1.2.4 — Fixed: complete slat recreation on update"
+    }
+  }
+}
