@@ -1,7 +1,5 @@
 // ha-shutter-card.js
-// v1.2.4 — Исправлено: наклон ламелей как в документации HA
-
-import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
+// v1.2.5 — Полная поддержка переводов через JSON
 
 // ─── Theme colors ──────────────────────────────────────────────────────
 const HA_THEMES = {
@@ -61,7 +59,7 @@ function shutterPresetGradient(preset, c1, c2, alpha, haTheme) {
 
 // ─── DEFAULT CONFIG ──────────────────────────────────────────────────────
 const SHUTTER_DEFAULT_CONFIG = {
-  language: 'ru',
+  language: 'en',
   theme: 'auto',
   mode: 'single',
   
@@ -423,6 +421,8 @@ class ShutterCard extends HTMLElement {
     this._subscribeEntities = [];
     this._isMoving = false;
     this._movementTimer = null;
+    this._translations = null;
+    this._translationsLoaded = false;
   }
 
   static getConfigElement() {
@@ -445,12 +445,168 @@ class ShutterCard extends HTMLElement {
 
   getCardSize() { return 6; }
 
-  get t() {
-    return SHUTTER_TRANSLATIONS[this._config.language || 'ru'] || SHUTTER_TRANSLATIONS.ru;
+  // ─── Переводы ──────────────────────────────────────────────────────────
+  async _loadTranslations() {
+    if (this._translationsLoaded) return;
+    
+    const lang = this._config.language || 'en';
+    const basePath = '/hacsfiles/ha-shutter-card/translations';
+    
+    try {
+      // Пробуем загрузить перевод для выбранного языка
+      const response = await fetch(`${basePath}/${lang}.json`);
+      if (response.ok) {
+        this._translations = await response.json();
+        this._translationsLoaded = true;
+        return;
+      }
+    } catch (e) {
+      console.warn(`Failed to load translations for ${lang}`, e);
+    }
+    
+    // Fallback на английский
+    try {
+      const fallbackResponse = await fetch(`${basePath}/en.json`);
+      if (fallbackResponse.ok) {
+        this._translations = await fallbackResponse.json();
+        this._translationsLoaded = true;
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to load fallback translations', e);
+    }
+    
+    // Встроенный fallback
+    this._translations = this._getDefaultTranslations();
+    this._translationsLoaded = true;
   }
 
-  _getHATheme() {
-    return getHATheme(this._config.theme || 'auto');
+  _getDefaultTranslations() {
+    return {
+      card: { title: 'Shutter', subtitle: 'Control' },
+      status: {
+        opening: 'OPENING', closing: 'CLOSING', stopped: 'STOPPED',
+        open: 'OPEN', closed: 'CLOSED', partial: 'STOPPED {position}%',
+        moving: 'Moving...'
+      },
+      labels: {
+        position: 'Position', open: 'Open', stop: 'Stop', close: 'Close',
+        camera: 'Camera', live: 'LIVE', offline: 'Offline', loading: 'Loading...',
+        motion: 'Motion', recording: 'Recording'
+      },
+      greet: {
+        night: 'Good night', morning: 'Good morning',
+        afternoon: 'Good afternoon', evening: 'Good evening'
+      },
+      editor: {
+        language: 'Language', title: 'Title', titleLabel: 'Card title',
+        subtitleLabel: 'Subtitle', ownerName: 'Owner name',
+        theme: 'Theme', themeAuto: 'Auto (system)', themeDark: 'Dark', themeLight: 'Light',
+        entities: 'Entities', entity: 'Shutter entity',
+        mode: 'Mode', modeSingle: 'Single', modeSingleSub: 'One shutter',
+        modeDual: 'Dual', modeDualSub: 'Left + Right',
+        camera: 'Camera', showCamera: 'Show camera', showCameraDesc: 'Display camera on card',
+        cameraSize: 'Camera size', cameraSizeSmall: 'Small', cameraSizeMedium: 'Medium', cameraSizeLarge: 'Large',
+        refreshInterval: 'Refresh interval', refreshIntervalDesc: 'How often to refresh camera frame (sec)',
+        colors: 'Colors', colorAccent: 'Accent color', colorText: 'Text color',
+        colorOpen: 'Open color', colorClosed: 'Closed color',
+        colorBlind: 'Shutter color', colorBlindLeft: 'Shutter color (left)', colorBlindRight: 'Shutter color (right)',
+        resetColors: 'Reset colors',
+        background: 'Background', bgPresets: 'Preset', bgAlpha: 'Opacity', bgBlur: 'Blur',
+        bgImage: 'Background image URL',
+        bgImageDesc: 'Image shown as background under the shutter (only when camera is off)',
+        display: 'Display', controlsPosition: 'Controls position',
+        controlsBottom: 'Bottom', controlsBottomSub: 'Horizontal',
+        controlsTop: 'Top', controlsTopSub: 'Horizontal',
+        controlsLeft: 'Left', controlsLeftSub: 'Vertical',
+        controlsRight: 'Right', controlsRightSub: 'Vertical',
+        showPosition: 'Show position', showControls: 'Show controls',
+        showStatus: 'Show status', invertPosition: 'Invert position',
+        invertPositionDesc: 'Invert position value (100% = closed)',
+        showGreet: 'Greeting', showGreetDesc: 'Show time-of-day greeting',
+        advanced: 'Advanced settings',
+        progressBar: 'Progress bar', showProgressBar: 'Show progress bar',
+        showProgressBarDesc: 'Display animated progress bar under shutter',
+        progressStyle: 'Progress bar style', progressStyleGradient: 'Gradient', progressStyleSolid: 'Solid',
+        noFeedback: 'No feedback mode', noFeedbackDesc: 'For devices without position sensor',
+        memoryType: 'Storage method', memoryTypeLocalStorage: 'localStorage', memoryTypeInputNumber: 'input_number',
+        tilt: 'Tilt control', showTiltVisual: 'Enable tilt visualization',
+        showTiltVisualDesc: 'Disabled — slats always at 0% (fully closed)',
+        showTiltControls: 'Show tilt buttons',
+        showTiltControlsDesc: '↕ buttons under the shutter (only if tilt is enabled)',
+        tiltEntity: 'Tilt entity (optional)', tiltEntityLeft: 'Tilt entity (left)', tiltEntityRight: 'Tilt entity (right)',
+        tiltEntityDesc: 'If not specified, uses the main entity',
+        tiltNewLogic: 'New tilt logic:',
+        tiltNewLogic0: '0% = fully closed (slats tightly packed)',
+        tiltNewLogic50: '50% = half open',
+        tiltNewLogic100: '100% = fully open (slats edge-on)',
+        dualInfo: 'In "Dual" mode controls are positioned:',
+        dualInfoLeft: 'Left — for left shutter',
+        dualInfoRight: 'Right — for right shutter',
+        inputNumberEntity: 'Input number for position storage',
+        inputNumberLeft: 'Input number (left)',
+        inputNumberRight: 'Input number (right)'
+      }
+    };
+  }
+
+  _t(key, params = {}) {
+    if (!this._translations) return key;
+    
+    const parts = key.split('.');
+    let value = this._translations;
+    for (const part of parts) {
+      if (value && value[part] !== undefined) {
+        value = value[part];
+      } else {
+        return key;
+      }
+    }
+    
+    if (typeof value === 'string') {
+      let result = value;
+      for (const [paramKey, paramValue] of Object.entries(params)) {
+        result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), paramValue);
+      }
+      return result;
+    }
+    
+    return key;
+  }
+
+  _getGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 6) return this._t('greet.night');
+    if (hour < 12) return this._t('greet.morning');
+    if (hour < 18) return this._t('greet.afternoon');
+    return this._t('greet.evening');
+  }
+
+  get t() {
+    return {
+      status: {
+        opening: this._t('status.opening'),
+        closing: this._t('status.closing'),
+        stopped: this._t('status.stopped'),
+        open: this._t('status.open'),
+        closed: this._t('status.closed'),
+        partial: (p) => this._t('status.partial', { position: Math.round(p) }),
+        moving: this._t('status.moving')
+      },
+      labels: {
+        position: this._t('labels.position'),
+        open: this._t('labels.open'),
+        stop: this._t('labels.stop'),
+        close: this._t('labels.close'),
+        camera: this._t('labels.camera'),
+        live: this._t('labels.live'),
+        offline: this._t('labels.offline'),
+        loading: this._t('labels.loading'),
+        motion: this._t('labels.motion'),
+        recording: this._t('labels.recording')
+      },
+      greet: () => this._getGreeting()
+    };
   }
 
   // ─── Работа с цветами ──────────────────────────────────────────────────
@@ -520,7 +676,10 @@ class ShutterCard extends HTMLElement {
     this._leftTilt = 0;
     this._rightTilt = 0;
     this._initialized = false;
-    this._render();
+    this._translationsLoaded = false;
+    this._loadTranslations().then(() => {
+      this._render();
+    });
   }
 
   set hass(hass) {
@@ -529,7 +688,13 @@ class ShutterCard extends HTMLElement {
     if (this._initialized) {
       this._update();
     } else {
-      this._render();
+      if (!this._translationsLoaded) {
+        this._loadTranslations().then(() => {
+          this._render();
+        });
+      } else {
+        this._render();
+      }
     }
   }
 
@@ -684,7 +849,7 @@ class ShutterCard extends HTMLElement {
     
     if (cfg.no_feedback) {
       if (this._isMoving) {
-        return { text: t.status.moving || 'Движется...', dot: 'orange', color: '#f59e0b' };
+        return { text: t.status.moving, dot: 'orange', color: '#f59e0b' };
       }
       if (pos <= 1) return { text: t.status.closed, dot: 'red', color: cfg.color_closed || '#ef4444' };
       if (pos >= 99) return { text: t.status.open, dot: 'green', color: cfg.color_open || '#4ade80' };
@@ -786,7 +951,6 @@ class ShutterCard extends HTMLElement {
     const overlay = this.shadowRoot?.querySelector(`.shutter-half.${side} .blind-overlay`);
     if (!overlay) return;
     
-    // Полностью пересоздаем содержимое overlay
     overlay.innerHTML = '';
     overlay.style.transform = 'none';
     overlay.style.background = 'transparent';
@@ -806,7 +970,6 @@ class ShutterCard extends HTMLElement {
     const effectiveHeight = heightFactor * slatHeight;
     const offset = (slatHeight - effectiveHeight) / 2;
     
-    // Создаем все ламели заново
     for (let i = 0; i < numSlats; i++) {
       const slat = document.createElement('div');
       slat.className = 'slat';
@@ -982,8 +1145,15 @@ class ShutterCard extends HTMLElement {
 
   // ─── Рендер ─────────────────────────────────────────────────────────────
   _render() {
-    if (!this._hass) {
-      this._renderUnconfigured();
+    if (!this._hass || !this._translationsLoaded) {
+      if (!this._translationsLoaded) {
+        this._loadTranslations().then(() => {
+          if (this._hass) this._render();
+        });
+      }
+      if (!this._hass) {
+        this._renderUnconfigured();
+      }
       return;
     }
 
@@ -1093,13 +1263,21 @@ class ShutterCard extends HTMLElement {
         tiltControlsHtml = `
           <div class="tilt-controls" style="display:flex;gap:4px;justify-content:space-between;width:100%;">
             <div style="display:flex;gap:4px;">
-              <button class="tilt-btn tilt-up" data-side="left" data-tilt="up" title="Наклон левой вверх">↕</button>
-              <button class="tilt-btn tilt-down" data-side="left" data-tilt="down" title="Наклон левой вниз">↕</button>
+              <button class="tilt-btn tilt-up" data-side="left" data-tilt="up" title="${this._t('editor.tilt')}">
+                <span class="ico">↕</span>
+              </button>
+              <button class="tilt-btn tilt-down" data-side="left" data-tilt="down" title="${this._t('editor.tilt')}">
+                <span class="ico">↕</span>
+              </button>
               <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">Л</span>
             </div>
             <div style="display:flex;gap:4px;">
-              <button class="tilt-btn tilt-up" data-side="right" data-tilt="up" title="Наклон правой вверх">↕</button>
-              <button class="tilt-btn tilt-down" data-side="right" data-tilt="down" title="Наклон правой вниз">↕</button>
+              <button class="tilt-btn tilt-up" data-side="right" data-tilt="up" title="${this._t('editor.tilt')}">
+                <span class="ico">↕</span>
+              </button>
+              <button class="tilt-btn tilt-down" data-side="right" data-tilt="down" title="${this._t('editor.tilt')}">
+                <span class="ico">↕</span>
+              </button>
               <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">П</span>
             </div>
           </div>
@@ -1107,8 +1285,12 @@ class ShutterCard extends HTMLElement {
       } else {
         tiltControlsHtml = `
           <div class="tilt-controls" style="display:flex;gap:4px;justify-content:center;width:100%;">
-            <button class="tilt-btn tilt-up" data-side="single" data-tilt="up" title="Наклон вверх">↕</button>
-            <button class="tilt-btn tilt-down" data-side="single" data-tilt="down" title="Наклон вниз">↕</button>
+            <button class="tilt-btn tilt-up" data-side="single" data-tilt="up" title="${this._t('editor.tilt')}">
+              <span class="ico">↕</span>
+            </button>
+            <button class="tilt-btn tilt-down" data-side="single" data-tilt="down" title="${this._t('editor.tilt')}">
+              <span class="ico">↕</span>
+            </button>
           </div>
         `;
       }
@@ -1181,7 +1363,7 @@ class ShutterCard extends HTMLElement {
     const showLive = showCamera && cameraUrl;
     
     const noFeedbackBadge = cfg.no_feedback ? `
-      <span class="no-feedback-badge">📡 Без ОС</span>
+      <span class="no-feedback-badge">📡 ${this._t('editor.noFeedback')}</span>
     ` : '';
     
     overlayHtml = `
@@ -1196,12 +1378,12 @@ class ShutterCard extends HTMLElement {
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;${!showLive ? 'margin-left:auto;' : ''}">
             ${cfg.camera_show_motion !== false ? `
               <div class="badge" style="${isMotion ? 'border:1px solid #f59e0b;' : 'opacity:0.5;'}">
-                ${isMotion ? '🔴' : '⚪'} ${t.labels.motion || 'Движение'}
+                ${isMotion ? '🔴' : '⚪'} ${t.labels.motion}
               </div>
             ` : ''}
             ${cfg.camera_show_recording !== false ? `
               <div class="badge" style="${isRecording ? 'border:1px solid #ef4444;' : 'opacity:0.5;'}">
-                ${isRecording ? '<span class="recording-indicator"><span class="rec-dot"></span> REC</span>' : '⏹ ' + (t.labels.recording || 'Запись')}
+                ${isRecording ? '<span class="recording-indicator"><span class="rec-dot"></span> REC</span>' : '⏹ ' + t.labels.recording}
               </div>
             ` : ''}
             ${noFeedbackBadge}
@@ -1331,7 +1513,7 @@ class ShutterCard extends HTMLElement {
 
     let greetText = '';
     if (cfg.show_greet !== false) {
-      try { greetText = t.greet ? t.greet() : ''; } catch (_) { greetText = ''; }
+      greetText = this._getGreeting();
     }
 
     // ─── Header ──────────────────────────────────────────────────────────
@@ -1346,9 +1528,9 @@ class ShutterCard extends HTMLElement {
     } else if (isDual && showStatusBar) {
       headerStatusHtml = `
         <div style="display:flex;gap:12px;font-size:10px;color:${theme.text_muted};flex-wrap:wrap;justify-content:flex-end;">
-          <span style="color:${leftStatus.color}">Левая: ${leftStatus.text}</span>
+          <span style="color:${leftStatus.color}">${this._t('editor.colorBlindLeft')}: ${leftStatus.text}</span>
           <span style="color:${theme.text_muted};">|</span>
-          <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
+          <span style="color:${rightStatus.color}">${this._t('editor.colorBlindRight')}: ${rightStatus.text}</span>
         </div>
       `;
     }
@@ -1370,10 +1552,10 @@ class ShutterCard extends HTMLElement {
         statusBarHtml = `
           <div class="status-bar">
             <div class="status-dual">
-              <span>Левая:</span>
+              <span>${this._t('editor.colorBlindLeft')}:</span>
               <span class="state" style="color:${leftStatus.color}">${Math.round(this._leftPos)}%</span>
               <span style="color:${theme.text_muted};">|</span>
-              <span>Правая:</span>
+              <span>${this._t('editor.colorBlindRight')}:</span>
               <span class="state" style="color:${rightStatus.color}">${Math.round(this._rightPos)}%</span>
               ${cfg.no_feedback ? `<span class="no-feedback-badge" style="margin-left:8px;">💾</span>` : ''}
             </div>
@@ -1495,9 +1677,9 @@ class ShutterCard extends HTMLElement {
             const leftStatus = this._getStatusText(this._leftPos, leftState);
             const rightStatus = this._getStatusText(this._rightPos, rightState);
             headerDual.innerHTML = `
-              <span style="color:${leftStatus.color}">Левая: ${leftStatus.text}</span>
+              <span style="color:${leftStatus.color}">${this._t('editor.colorBlindLeft')}: ${leftStatus.text}</span>
               <span style="color:${theme.text_muted};">|</span>
-              <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
+              <span style="color:${rightStatus.color}">${this._t('editor.colorBlindRight')}: ${rightStatus.text}</span>
             `;
           }
         }
@@ -1562,14 +1744,15 @@ class ShutterCard extends HTMLElement {
     const overlayTop = this.shadowRoot?.querySelector('.camera-overlay-top');
     if (overlayTop) {
       const badges = overlayTop.querySelectorAll('.badge');
+      const t = this.t;
       let motionBadge = null, recordingBadge = null;
       badges.forEach(badge => {
         const text = badge.textContent;
-        if (text.includes('Движение') || text.includes('движение') || text.includes('Motion')) motionBadge = badge;
-        if (text.includes('Запись') || text.includes('запись') || text.includes('REC') || text.includes('recording')) recordingBadge = badge;
+        if (text.includes(t.labels.motion)) motionBadge = badge;
+        if (text.includes(t.labels.recording) || text.includes('REC')) recordingBadge = badge;
       });
       if (motionBadge && cfg.camera_show_motion !== false) {
-        motionBadge.textContent = isMotion ? '🔴 Движение' : '⚪ Движение';
+        motionBadge.textContent = isMotion ? '🔴 ' + t.labels.motion : '⚪ ' + t.labels.motion;
         motionBadge.style.border = isMotion ? '1px solid #f59e0b' : 'none';
         motionBadge.style.opacity = isMotion ? '1' : '0.5';
       }
@@ -1579,7 +1762,7 @@ class ShutterCard extends HTMLElement {
           recordingBadge.style.border = '1px solid #ef4444';
           recordingBadge.style.opacity = '1';
         } else {
-          recordingBadge.textContent = '⏹ Запись';
+          recordingBadge.textContent = '⏹ ' + t.labels.recording;
           recordingBadge.style.border = 'none';
           recordingBadge.style.opacity = '0.5';
         }
@@ -1854,11 +2037,19 @@ class ShutterCardEditor extends HTMLElement {
     this._open = { lang: true, title: true, entities: true, camera: true, overlay: true, colors: false, bg: true, display: true, advanced: false, tilt: false };
     this._picker = null;
     this._updating = false;
+    this._translations = null;
+    this._translationsLoaded = false;
   }
 
   setConfig(config) {
     this._config = { ...SHUTTER_DEFAULT_CONFIG, ...config };
-    this._render();
+    if (!this._translationsLoaded) {
+      this._loadTranslations().then(() => {
+        this._render();
+      });
+    } else {
+      this._render();
+    }
   }
 
   set hass(h) {
@@ -1866,8 +2057,115 @@ class ShutterCardEditor extends HTMLElement {
     setTimeout(() => this._syncPickers(), 100);
   }
 
-  get t() {
-    return SHUTTER_TRANSLATIONS[this._config.language || 'ru'] || SHUTTER_TRANSLATIONS.ru;
+  // ─── Переводы для редактора ──────────────────────────────────────────
+  async _loadTranslations() {
+    if (this._translationsLoaded) return;
+    
+    const lang = this._config.language || 'en';
+    const basePath = '/hacsfiles/ha-shutter-card/translations';
+    
+    try {
+      const response = await fetch(`${basePath}/${lang}.json`);
+      if (response.ok) {
+        this._translations = await response.json();
+        this._translationsLoaded = true;
+        return;
+      }
+    } catch (e) {
+      console.warn(`Failed to load editor translations for ${lang}`, e);
+    }
+    
+    try {
+      const fallbackResponse = await fetch(`${basePath}/en.json`);
+      if (fallbackResponse.ok) {
+        this._translations = await fallbackResponse.json();
+        this._translationsLoaded = true;
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to load fallback editor translations', e);
+    }
+    
+    this._translations = this._getDefaultTranslations();
+    this._translationsLoaded = true;
+  }
+
+  _getDefaultTranslations() {
+    return {
+      editor: {
+        language: 'Language', title: 'Title', titleLabel: 'Card title',
+        subtitleLabel: 'Subtitle', ownerName: 'Owner name',
+        theme: 'Theme', themeAuto: 'Auto (system)', themeDark: 'Dark', themeLight: 'Light',
+        entities: 'Entities', entity: 'Shutter entity',
+        mode: 'Mode', modeSingle: 'Single', modeSingleSub: 'One shutter',
+        modeDual: 'Dual', modeDualSub: 'Left + Right',
+        camera: 'Camera', showCamera: 'Show camera', showCameraDesc: 'Display camera on card',
+        cameraSize: 'Camera size', cameraSizeSmall: 'Small', cameraSizeMedium: 'Medium', cameraSizeLarge: 'Large',
+        refreshInterval: 'Refresh interval', refreshIntervalDesc: 'How often to refresh camera frame (sec)',
+        colors: 'Colors', colorAccent: 'Accent color', colorText: 'Text color',
+        colorOpen: 'Open color', colorClosed: 'Closed color',
+        colorBlind: 'Shutter color', colorBlindLeft: 'Shutter color (left)', colorBlindRight: 'Shutter color (right)',
+        resetColors: 'Reset colors',
+        background: 'Background', bgPresets: 'Preset', bgAlpha: 'Opacity', bgBlur: 'Blur',
+        bgImage: 'Background image URL',
+        bgImageDesc: 'Image shown as background under the shutter (only when camera is off)',
+        display: 'Display', controlsPosition: 'Controls position',
+        controlsBottom: 'Bottom', controlsBottomSub: 'Horizontal',
+        controlsTop: 'Top', controlsTopSub: 'Horizontal',
+        controlsLeft: 'Left', controlsLeftSub: 'Vertical',
+        controlsRight: 'Right', controlsRightSub: 'Vertical',
+        showPosition: 'Show position', showControls: 'Show controls',
+        showStatus: 'Show status', invertPosition: 'Invert position',
+        invertPositionDesc: 'Invert position value (100% = closed)',
+        showGreet: 'Greeting', showGreetDesc: 'Show time-of-day greeting',
+        advanced: 'Advanced settings',
+        progressBar: 'Progress bar', showProgressBar: 'Show progress bar',
+        showProgressBarDesc: 'Display animated progress bar under shutter',
+        progressStyle: 'Progress bar style', progressStyleGradient: 'Gradient', progressStyleSolid: 'Solid',
+        noFeedback: 'No feedback mode', noFeedbackDesc: 'For devices without position sensor',
+        memoryType: 'Storage method', memoryTypeLocalStorage: 'localStorage', memoryTypeInputNumber: 'input_number',
+        tilt: 'Tilt control', showTiltVisual: 'Enable tilt visualization',
+        showTiltVisualDesc: 'Disabled — slats always at 0% (fully closed)',
+        showTiltControls: 'Show tilt buttons',
+        showTiltControlsDesc: '↕ buttons under the shutter (only if tilt is enabled)',
+        tiltEntity: 'Tilt entity (optional)', tiltEntityLeft: 'Tilt entity (left)', tiltEntityRight: 'Tilt entity (right)',
+        tiltEntityDesc: 'If not specified, uses the main entity',
+        tiltNewLogic: 'New tilt logic:',
+        tiltNewLogic0: '0% = fully closed (slats tightly packed)',
+        tiltNewLogic50: '50% = half open',
+        tiltNewLogic100: '100% = fully open (slats edge-on)',
+        dualInfo: 'In "Dual" mode controls are positioned:',
+        dualInfoLeft: 'Left — for left shutter',
+        dualInfoRight: 'Right — for right shutter',
+        inputNumberEntity: 'Input number for position storage',
+        inputNumberLeft: 'Input number (left)',
+        inputNumberRight: 'Input number (right)'
+      }
+    };
+  }
+
+  _t(key, params = {}) {
+    if (!this._translations) return key;
+    
+    const parts = key.split('.');
+    let value = this._translations;
+    for (const part of parts) {
+      if (value && value[part] !== undefined) {
+        value = value[part];
+      } else {
+        return key;
+      }
+    }
+    
+    if (typeof value === 'string') {
+      let result = value;
+      for (const [paramKey, paramValue] of Object.entries(params)) {
+        result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), paramValue);
+      }
+      return result;
+    }
+    
+    return key;
   }
 
   _fire() {
@@ -1966,9 +2264,16 @@ class ShutterCardEditor extends HTMLElement {
   }
 
   _render() {
+    if (!this._translationsLoaded) {
+      this._loadTranslations().then(() => {
+        if (this._config) this._render();
+      });
+      return;
+    }
+
     const cfg = this._config;
-    const t = this.t;
-    const lang = cfg.language || 'ru';
+    const t = this._t;
+    const lang = cfg.language || 'en';
     const bgP = cfg.background_preset || 'default';
     const refreshInterval = cfg.camera_refresh_interval || 300;
     const theme = cfg.theme || 'auto';
@@ -2181,23 +2486,25 @@ class ShutterCardEditor extends HTMLElement {
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.4 — Исправлено полное пересоздание ламелей при обновлении</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.5 — Полная поддержка переводов</span>
         </div>
 
         <!-- Language -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-lang">
-            <span>${t.edLang || 'Язык'}</span>
+            <span>${t('editor.language')}</span>
             <span class="acc-arrow" id="arrow-lang">${this._open.lang ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-lang" style="display:${this._open.lang ? 'block' : 'none'}">
             <div class="lang-grid">
-              ${Object.entries(SHUTTER_TRANSLATIONS).map(([code, tr]) => `
-                <div class="lang-btn ${lang === code ? 'on' : ''}" data-lang="${code}">
-                  <img src="https://flagcdn.com/20x15/${tr.flag}.png" width="20" height="15" alt="${tr.lang}" style="border-radius:2px;flex-shrink:0;display:block;">
-                  ${tr.lang}
-                </div>
-              `).join('')}
+              ${['en', 'ru'].map(code => {
+                const names = { en: 'English 🇬🇧', ru: 'Русский 🇷🇺' };
+                return `
+                  <div class="lang-btn ${lang === code ? 'on' : ''}" data-lang="${code}">
+                    ${names[code] || code}
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         </div>
@@ -2205,37 +2512,35 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Title & Theme -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-title">
-            <span>${t.edTitle || 'Название'}</span>
+            <span>${t('editor.title')}</span>
             <span class="acc-arrow" id="arrow-title">${this._open.title ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-title" style="display:${this._open.title ? 'block' : 'none'}">
             <div class="row">
-              <label>${t.edTitleLabel || 'Название карточки'}</label>
+              <label>${t('editor.titleLabel')}</label>
               <input class="txt-inp" type="text" id="inp-title" value="${cfg.title || ''}" placeholder=""/>
             </div>
             <div class="row">
-              <label>${t.edSubtitleLabel || 'Подзаголовок'}</label>
+              <label>${t('editor.subtitleLabel')}</label>
               <input class="txt-inp" type="text" id="inp-subtitle" value="${cfg.subtitle || ''}" placeholder=""/>
             </div>
             <div class="row">
-              <label>${t.edOwnerName || 'Имя владельца'}</label>
+              <label>${t('editor.ownerName')}</label>
               <input class="txt-inp" type="text" id="inp-owner" value="${cfg.owner_name || ''}" placeholder="Smart Home"/>
             </div>
             <div style="height:1px;background:var(--divider-color);margin:8px 0;"></div>
             
-            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.edTheme || 'Тема'}</label>
+            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t('editor.theme')}</label>
             <div class="theme-grid">
               <div class="theme-btn ${theme === 'auto' ? 'on' : ''}" data-theme="auto">
-                ${t.edThemeAuto || 'Авто'}
-                <span class="sub">${t.edThemeDesc || 'Системная'}</span>
+                ${t('editor.themeAuto')}
+                <span class="sub">${t('editor.themeAuto')}</span>
               </div>
               <div class="theme-btn ${theme === 'dark' ? 'on' : ''}" data-theme="dark">
-                ${t.edThemeDark || 'Тёмная'}
-                <span class="sub">${t.edThemeDesc || ''}</span>
+                ${t('editor.themeDark')}
               </div>
               <div class="theme-btn ${theme === 'light' ? 'on' : ''}" data-theme="light">
-                ${t.edThemeLight || 'Светлая'}
-                <span class="sub">${t.edThemeDesc || ''}</span>
+                ${t('editor.themeLight')}
               </div>
             </div>
           </div>
@@ -2244,26 +2549,26 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Mode & Entities -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-entities">
-            <span>${t.edEntities || 'Сущности'}</span>
+            <span>${t('editor.entities')}</span>
             <span class="acc-arrow" id="arrow-entities">${this._open.entities ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-entities" style="display:${this._open.entities ? 'block' : 'none'}">
-            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.edMode || 'Режим'}</label>
+            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t('editor.mode')}</label>
             <div class="mode-grid">
               <div class="mode-btn ${mode === 'single' ? 'on' : ''}" data-mode="single">
-                ${t.edModeSingle || 'Одно'}
-                <span class="sub">${t.edModeSingleSub || 'Одна шторка'}</span>
+                ${t('editor.modeSingle')}
+                <span class="sub">${t('editor.modeSingleSub')}</span>
               </div>
               <div class="mode-btn ${mode === 'dual' ? 'on' : ''}" data-mode="dual">
-                ${t.edModeDual || 'Два'}
-                <span class="sub">${t.edModeDualSub || 'Левая + Правая'}</span>
+                ${t('editor.modeDual')}
+                <span class="sub">${t('editor.modeDualSub')}</span>
               </div>
             </div>
 
             <div class="${mode === 'single' ? '' : 'dual-entities'}">
-              ${this._entityField('entity_id', t.edEntity || 'Сущность жалюзи', 'cover')}
+              ${this._entityField('entity_id', t('editor.entity'), 'cover')}
               <div class="row">
-                <label>Цвет шторки (RGBA)</label>
+                <label>${t('editor.colorBlind')}</label>
                 <div class="color-blind-row">
                   <input type="color" id="color-blind-picker" value="#1a1a2e" />
                   <input class="txt-inp" type="text" id="color-blind-text" 
@@ -2271,7 +2576,7 @@ class ShutterCardEditor extends HTMLElement {
                     placeholder="rgba(26, 26, 46, 0.85)" />
                 </div>
                 <div class="color-blind-alpha">
-                  <label>Прозрачность:</label>
+                  <label>${t('editor.bgAlpha')}:</label>
                   <input type="range" id="color-blind-alpha" min="0" max="100" step="1" 
                     value="${parseFloat((cfg.color_blind || 'rgba(26,26,46,0.85)').match(/[\d.]+(?=\))/)?.[0] || 0.85) * 100}" />
                   <span class="alpha-value" id="color-blind-alpha-label">
@@ -2280,18 +2585,18 @@ class ShutterCardEditor extends HTMLElement {
                 </div>
               </div>
               <div class="tilt-entity-row">
-                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ Наклон ламелей</div>
-                ${this._entityField('tilt_entity_id', 'Сущность наклона (опционально)', 'cover')}
-                <div style="font-size:10px;color:var(--secondary-text-color);margin-top:2px;">Если не указана, используется основная сущность</div>
+                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ ${t('editor.tilt')}</div>
+                ${this._entityField('tilt_entity_id', t('editor.tiltEntity'), 'cover')}
+                <div style="font-size:10px;color:var(--secondary-text-color);margin-top:2px;">${t('editor.tiltEntityDesc')}</div>
               </div>
             </div>
 
             <div class="dual-entities" id="dual-entities">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <div>
-                  ${this._entityField('left_entity_id', 'Сущность (левая)', 'cover')}
+                  ${this._entityField('left_entity_id', t('editor.colorBlindLeft'), 'cover')}
                   <div class="row">
-                    <label>Цвет шторки (левая)</label>
+                    <label>${t('editor.colorBlindLeft')}</label>
                     <div class="color-blind-row">
                       <input type="color" id="left-color-blind-picker" value="#1a1a2e" />
                       <input class="txt-inp" type="text" id="left-color-blind-text" 
@@ -2299,7 +2604,7 @@ class ShutterCardEditor extends HTMLElement {
                         placeholder="rgba(26, 26, 46, 0.85)" />
                     </div>
                     <div class="color-blind-alpha">
-                      <label>Прозрачность:</label>
+                      <label>${t('editor.bgAlpha')}:</label>
                       <input type="range" id="left-color-blind-alpha" min="0" max="100" step="1" 
                         value="${parseFloat((cfg.left_color_blind || 'rgba(26,26,46,0.85)').match(/[\d.]+(?=\))/)?.[0] || 0.85) * 100}" />
                       <span class="alpha-value" id="left-color-blind-alpha-label">
@@ -2308,13 +2613,13 @@ class ShutterCardEditor extends HTMLElement {
                     </div>
                   </div>
                   <div class="tilt-entity-row">
-                    ${this._entityField('tilt_entity_left', 'Наклон (левая)', 'cover')}
+                    ${this._entityField('tilt_entity_left', t('editor.tiltEntityLeft'), 'cover')}
                   </div>
                 </div>
                 <div>
-                  ${this._entityField('right_entity_id', 'Сущность (правая)', 'cover')}
+                  ${this._entityField('right_entity_id', t('editor.colorBlindRight'), 'cover')}
                   <div class="row">
-                    <label>Цвет шторки (правая)</label>
+                    <label>${t('editor.colorBlindRight')}</label>
                     <div class="color-blind-row">
                       <input type="color" id="right-color-blind-picker" value="#1a1a2e" />
                       <input class="txt-inp" type="text" id="right-color-blind-text" 
@@ -2322,7 +2627,7 @@ class ShutterCardEditor extends HTMLElement {
                         placeholder="rgba(26, 26, 46, 0.85)" />
                     </div>
                     <div class="color-blind-alpha">
-                      <label>Прозрачность:</label>
+                      <label>${t('editor.bgAlpha')}:</label>
                       <input type="range" id="right-color-blind-alpha" min="0" max="100" step="1" 
                         value="${parseFloat((cfg.right_color_blind || 'rgba(26,26,46,0.85)').match(/[\d.]+(?=\))/)?.[0] || 0.85) * 100}" />
                       <span class="alpha-value" id="right-color-blind-alpha-label">
@@ -2331,57 +2636,57 @@ class ShutterCardEditor extends HTMLElement {
                     </div>
                   </div>
                   <div class="tilt-entity-row">
-                    ${this._entityField('tilt_entity_right', 'Наклон (правая)', 'cover')}
+                    ${this._entityField('tilt_entity_right', t('editor.tiltEntityRight'), 'cover')}
                   </div>
                 </div>
               </div>
             </div>
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
-            ${this._entityField('camera_entity', 'Камера', 'camera')}
-            ${this._entityField('motion_entity', 'Датчик движения', 'binary_sensor')}
-            ${this._entityField('recording_entity', 'Статус записи', 'binary_sensor')}
+            ${this._entityField('camera_entity', t('editor.camera'), 'camera')}
+            ${this._entityField('motion_entity', t('editor.labels.motion'), 'binary_sensor')}
+            ${this._entityField('recording_entity', t('editor.labels.recording'), 'binary_sensor')}
           </div>
         </div>
 
         <!-- Tilt Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-tilt">
-            <span>↕ Наклон ламелей</span>
+            <span>↕ ${t('editor.tilt')}</span>
             <span class="acc-arrow" id="arrow-tilt">${this._open.tilt ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-tilt" style="display:${this._open.tilt ? 'block' : 'none'}">
             <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;padding:6px 10px;background:var(--secondary-background-color);border-radius:6px;border-left:3px solid var(--primary-color);">
-              <strong>Новая логика наклона:</strong><br>
-              0% = полностью закрыто (ламели плотно прилегают друг к другу)<br>
-              50% = половина открыто<br>
-              100% = полностью открыто (ламели повернуты ребром)
+              <strong>${t('editor.tiltNewLogic')}</strong><br>
+              ${t('editor.tiltNewLogic0')}<br>
+              ${t('editor.tiltNewLogic50')}<br>
+              ${t('editor.tiltNewLogic100')}
             </div>
-            ${this._toggleSwitch('show_tilt_visual', 'Включить наклон ламелей', 'Выключено — ламели всегда в положении 0% (плотно закрыты)')}
-            ${this._toggleSwitch('show_tilt_controls', 'Показать кнопки наклона', 'Кнопки ↕ под шторкой (только если наклон включён)')}
+            ${this._toggleSwitch('show_tilt_visual', t('editor.showTiltVisual'), t('editor.showTiltVisualDesc'))}
+            ${this._toggleSwitch('show_tilt_controls', t('editor.showTiltControls'), t('editor.showTiltControlsDesc'))}
           </div>
         </div>
 
         <!-- Camera Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-camera">
-            <span>${t.edCamera || 'Камера'}</span>
+            <span>${t('editor.camera')}</span>
             <span class="acc-arrow" id="arrow-camera">${this._open.camera ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-camera" style="display:${this._open.camera ? 'block' : 'none'}">
-            ${this._toggleSwitch('show_camera', 'Показать камеру', 'Отображать камеру на карточке')}
+            ${this._toggleSwitch('show_camera', t('editor.showCamera'), t('editor.showCameraDesc'))}
 
-            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin:10px 0 6px;">${t.edCameraSize || 'Размер камеры'}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin:10px 0 6px;">${t('editor.cameraSize')}</div>
             <div class="select-grid">
               ${['small', 'medium', 'large'].map(size => `
                 <div class="sel-btn ${(cfg.camera_size || 'medium') === size ? 'on' : ''}" data-cam-size="${size}">
-                  ${t[`edCameraSize${size.charAt(0).toUpperCase() + size.slice(1)}`] || size}
+                  ${t(`editor.cameraSize${size.charAt(0).toUpperCase() + size.slice(1)}`)}
                 </div>
               `).join('')}
             </div>
 
             <div class="row" style="margin-top:12px;">
-              <label>${t.edRefreshInterval || 'Интервал обновления'}</label>
+              <label>${t('editor.refreshInterval')}</label>
               <div style="display:flex;align-items:center;gap:10px;">
                 <input class="txt-inp" type="number" id="inp-refresh-interval" 
                   min="10" max="3600" step="10" 
@@ -2390,7 +2695,7 @@ class ShutterCardEditor extends HTMLElement {
                 <span style="font-size:12px;color:var(--secondary-text-color);">сек</span>
                 <span style="font-size:10px;color:var(--secondary-text-color);opacity:0.6;">(мин: ${Math.round(refreshInterval/60)})</span>
               </div>
-              <div style="font-size:11px;color:var(--secondary-text-color);margin-top:4px;">${t.edRefreshIntervalDesc || 'Как часто обновлять кадр камеры (сек)'}</div>
+              <div style="font-size:11px;color:var(--secondary-text-color);margin-top:4px;">${t('editor.refreshIntervalDesc')}</div>
             </div>
           </div>
         </div>
@@ -2404,26 +2709,26 @@ class ShutterCardEditor extends HTMLElement {
           <div class="acc-body" id="body-overlay" style="display:${this._open.overlay ? 'block' : 'none'}">
             <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;">Настройки отображения поверх видео</div>
             ${this._toggleSwitch('camera_show_timestamp', 'Показывать время', 'Отображать текущее время на видео')}
-            ${this._toggleSwitch('camera_show_motion', 'Индикатор движения', 'Показывать статус датчика движения')}
-            ${this._toggleSwitch('camera_show_recording', 'Индикатор записи', 'Показывать статус записи')}
+            ${this._toggleSwitch('camera_show_motion', t('editor.labels.motion'), 'Показывать статус датчика движения')}
+            ${this._toggleSwitch('camera_show_recording', t('editor.labels.recording'), 'Показывать статус записи')}
           </div>
         </div>
 
         <!-- Display -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-display">
-            <span>${t.edDisplay || 'Отображение'}</span>
+            <span>${t('editor.display')}</span>
             <span class="acc-arrow" id="arrow-display">${this._open.display ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-display" style="display:${this._open.display ? 'block' : 'none'}">
             ${mode === 'single' ? `
-              <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">Расположение кнопок управления</div>
+              <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">${t('editor.controlsPosition')}</div>
               <div class="controls-pos-grid">
                 ${[
-                  { id: 'bottom', label: '⬇️ Снизу', sub: 'Горизонтально' },
-                  { id: 'top', label: '⬆️ Сверху', sub: 'Горизонтально' },
-                  { id: 'left', label: '⬅️ Слева', sub: 'Вертикально' },
-                  { id: 'right', label: '➡️ Справа', sub: 'Вертикально' },
+                  { id: 'bottom', label: '⬇️ ' + t('editor.controlsBottom'), sub: t('editor.controlsBottomSub') },
+                  { id: 'top', label: '⬆️ ' + t('editor.controlsTop'), sub: t('editor.controlsTopSub') },
+                  { id: 'left', label: '⬅️ ' + t('editor.controlsLeft'), sub: t('editor.controlsLeftSub') },
+                  { id: 'right', label: '➡️ ' + t('editor.controlsRight'), sub: t('editor.controlsRightSub') },
                 ].map(p => `
                   <div class="controls-pos-btn ${controlsPos === p.id ? 'on' : ''}" data-controls-pos="${p.id}">
                     ${p.label}
@@ -2433,57 +2738,57 @@ class ShutterCardEditor extends HTMLElement {
               </div>
             ` : `
               <div class="dual-info">
-                📌 В режиме "Два" кнопки управления расположены:<br>
-                ⬅️ Слева — для левой шторки<br>
-                ➡️ Справа — для правой шторки
+                📌 ${t('editor.dualInfo')}<br>
+                ⬅️ ${t('editor.dualInfoLeft')}<br>
+                ➡️ ${t('editor.dualInfoRight')}
               </div>
             `}
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            ${this._toggleSwitch('show_greet', 'Приветствие', 'Показать приветствие по времени суток')}
-            ${this._toggleSwitch('show_position', 'Показать позицию', '')}
-            ${this._toggleSwitch('show_controls', 'Показать управление', '')}
-            ${this._toggleSwitch('show_status', 'Показать статус', '')}
-            ${this._toggleSwitch('invert_position', 'Инвертировать позицию', 'Инвертировать значение позиции (100% = закрыто)')}
+            ${this._toggleSwitch('show_greet', t('editor.showGreet'), t('editor.showGreetDesc'))}
+            ${this._toggleSwitch('show_position', t('editor.showPosition'), '')}
+            ${this._toggleSwitch('show_controls', t('editor.showControls'), '')}
+            ${this._toggleSwitch('show_status', t('editor.showStatus'), '')}
+            ${this._toggleSwitch('invert_position', t('editor.invertPosition'), t('editor.invertPositionDesc'))}
           </div>
         </div>
 
         <!-- Advanced Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-advanced">
-            <span>⚙️ Расширенные настройки</span>
+            <span>⚙️ ${t('editor.advanced')}</span>
             <span class="acc-arrow" id="arrow-advanced">${this._open.advanced ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-advanced" style="display:${this._open.advanced ? 'block' : 'none'}">
             
-            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📊 Шкала прогресса</div>
-            ${this._toggleSwitch('show_progress_bar', 'Показать шкалу прогресса', 'Отображать анимированную шкалу под шторкой')}
+            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📊 ${t('editor.progressBar')}</div>
+            ${this._toggleSwitch('show_progress_bar', t('editor.showProgressBar'), t('editor.showProgressBarDesc'))}
             
-            <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">Стиль шкалы</div>
+            <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">${t('editor.progressStyle')}</div>
             <div class="style-grid">
-              <div class="style-btn ${progressStyle === 'gradient' ? 'on' : ''}" data-progress-style="gradient">🌈 Градиент</div>
-              <div class="style-btn ${progressStyle === 'solid' ? 'on' : ''}" data-progress-style="solid">⬛ Сплошной</div>
+              <div class="style-btn ${progressStyle === 'gradient' ? 'on' : ''}" data-progress-style="gradient">🌈 ${t('editor.progressStyleGradient')}</div>
+              <div class="style-btn ${progressStyle === 'solid' ? 'on' : ''}" data-progress-style="solid">⬛ ${t('editor.progressStyleSolid')}</div>
             </div>
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📡 Режим без обратной связи</div>
-            ${this._toggleSwitch('no_feedback', 'Включить режим без ОС', 'Для устройств без датчика положения')}
+            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📡 ${t('editor.noFeedback')}</div>
+            ${this._toggleSwitch('no_feedback', t('editor.noFeedback'), t('editor.noFeedbackDesc'))}
             
             <div class="memory-options" id="memory-options">
-              <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">Способ хранения позиции</div>
+              <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">${t('editor.memoryType')}</div>
               <div class="style-grid">
-                <div class="style-btn ${memoryType === 'localstorage' ? 'on' : ''}" data-memory-type="localstorage">💾 localStorage</div>
-                <div class="style-btn ${memoryType === 'input_number' ? 'on' : ''}" data-memory-type="input_number">📝 input_number</div>
+                <div class="style-btn ${memoryType === 'localstorage' ? 'on' : ''}" data-memory-type="localstorage">💾 ${t('editor.memoryTypeLocalStorage')}</div>
+                <div class="style-btn ${memoryType === 'input_number' ? 'on' : ''}" data-memory-type="input_number">📝 ${t('editor.memoryTypeInputNumber')}</div>
               </div>
               
               <div id="input-number-fields" style="display:${memoryType === 'input_number' ? 'block' : 'none'};margin-top:8px;">
                 ${mode === 'single' ? `
-                  ${this._entityField('input_number_entity', 'Input number для хранения позиции', 'input_number')}
+                  ${this._entityField('input_number_entity', t('editor.inputNumberEntity'), 'input_number')}
                 ` : `
-                  ${this._entityField('left_input_number', 'Input number (левая)', 'input_number')}
-                  ${this._entityField('right_input_number', 'Input number (правая)', 'input_number')}
+                  ${this._entityField('left_input_number', t('editor.inputNumberLeft'), 'input_number')}
+                  ${this._entityField('right_input_number', t('editor.inputNumberRight'), 'input_number')}
                 `}
               </div>
             </div>
@@ -2493,38 +2798,38 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Colors -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-colors">
-            <span>${t.edColors || 'Цвета'}</span>
+            <span>${t('editor.colors')}</span>
             <span class="acc-arrow" id="arrow-colors">${this._open.colors ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-colors" style="display:${this._open.colors ? 'block' : 'none'}">
-            ${this._colorRow('color_open', 'Цвет открыто')}
-            ${this._colorRow('color_closed', 'Цвет закрыто')}
-            ${this._colorRow('color_accent', 'Акцентный цвет')}
-            ${this._colorRow('color_text', 'Цвет текста')}
-            <button class="reset-btn" id="btn-reset-colors">↩ Сбросить цвета</button>
+            ${this._colorRow('color_open', t('editor.colorOpen'))}
+            ${this._colorRow('color_closed', t('editor.colorClosed'))}
+            ${this._colorRow('color_accent', t('editor.colorAccent'))}
+            ${this._colorRow('color_text', t('editor.colorText'))}
+            <button class="reset-btn" id="btn-reset-colors">↩ ${t('editor.resetColors')}</button>
           </div>
         </div>
 
         <!-- Background -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-bg">
-            <span>${t.edBg || 'Фон для шторки'}</span>
+            <span>${t('editor.background')}</span>
             <span class="acc-arrow" id="arrow-bg">${this._open.bg ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-bg" style="display:${this._open.bg ? 'block' : 'none'}">
             <div class="row">
-              <label>URL фонового изображения (под шторкой)</label>
+              <label>${t('editor.bgImage')}</label>
               <input class="txt-inp" type="text" id="inp-bg-image" 
                 value="${cfg.bg_image || ''}" 
                 placeholder="https://example.com/background.jpg или /local/image.jpg"/>
               <div style="font-size:10px;color:var(--secondary-text-color);margin-top:4px;">
-                Изображение будет показано как фон под шторкой, только когда камера выключена.
+                ${t('editor.bgImageDesc')}
               </div>
             </div>
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:8px;">${t.edBgPresets || 'Пресет градиента'}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:8px;">${t('editor.bgPresets')}</div>
             <div class="bg-grid">
               ${SHUTTER_BG_PRESETS.map(p => {
                 const c1 = p.c1 || '#888', c2 = p.c2 || '#444';
@@ -2540,12 +2845,12 @@ class ShutterCardEditor extends HTMLElement {
               </div>
             ` : ''}
             <div class="sl-row">
-              <label>${t.edBgAlpha || 'Прозрачность'}</label>
+              <label>${t('editor.bgAlpha')}</label>
               <input type="range" id="inp-bg-alpha" min="0" max="100" step="1" value="${cfg.bg_alpha !== undefined ? cfg.bg_alpha : 85}"/>
               <span class="slv" id="bg-alpha-lbl">${cfg.bg_alpha !== undefined ? cfg.bg_alpha : 85}%</span>
             </div>
             <div class="sl-row" style="margin-top:4px;">
-              <label>${t.edBgBlur || 'Размытие'}</label>
+              <label>${t('editor.bgBlur')}</label>
               <input type="range" id="inp-bg-blur" min="0" max="30" step="1" value="${cfg.bg_blur !== undefined ? cfg.bg_blur : 12}"/>
               <span class="slv" id="bg-blur-lbl">${cfg.bg_blur !== undefined ? cfg.bg_blur : 12}px</span>
             </div>
@@ -2884,7 +3189,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.2.4 %c Исправлено полное пересоздание ламелей при обновлении!',
+  '%c 🪟 Shutter Card %c v1.2.5 %c Полная поддержка переводов через JSON!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
