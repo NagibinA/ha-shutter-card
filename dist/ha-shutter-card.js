@@ -1,7 +1,7 @@
 // ha-shutter-card.js
-// v1.2.5 — Полная локализация всех строк
+// v1.2.4 — Исправлено: наклон ламелей как в документации HA
 
-import { getLocalizedString, DEFAULT_LANGUAGE } from './translations/index.js';
+import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
 // ─── Theme colors ──────────────────────────────────────────────────────
 const HA_THEMES = {
@@ -61,7 +61,7 @@ function shutterPresetGradient(preset, c1, c2, alpha, haTheme) {
 
 // ─── DEFAULT CONFIG ──────────────────────────────────────────────────────
 const SHUTTER_DEFAULT_CONFIG = {
-  language: 'en',
+  language: 'ru',
   theme: 'auto',
   mode: 'single',
   
@@ -75,21 +75,21 @@ const SHUTTER_DEFAULT_CONFIG = {
   left_color_blind: 'rgba(26, 26, 46, 0.85)',
   right_color_blind: 'rgba(26, 26, 46, 0.85)',
   
-  // Tilt
+  // Tilt (наклон ламелей)
   tilt_entity_id: '',
   tilt_entity_left: '',
   tilt_entity_right: '',
   show_tilt_controls: false,
   show_tilt_visual: true,
   
-  // No feedback
+  // Режим без датчика положения
   no_feedback: false,
   memory_type: 'localstorage',
   input_number_entity: '',
   left_input_number: '',
   right_input_number: '',
   
-  // General
+  // Общие настройки
   title: '',
   subtitle: '',
   owner_name: 'Smart Home',
@@ -138,15 +138,18 @@ function getShutterCSS(haTheme) {
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :host{display:block;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 
+/* ─── Card ─────────────────────────────────────────────────────────────── */
 .card{background:${bgGrad};border-radius:24px;border:1px solid ${theme.border};
   overflow:hidden;position:relative;box-shadow:${theme.card_shadow},inset 0 1px 0 rgba(255,255,255,0.04)}
 .card::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse at 70% 30%,rgba(0,150,255,0.04),transparent 60%)}
 .inner{position:relative;z-index:1;padding:18px 18px 14px}
 
+/* ─── Layout ───────────────────────────────────────────────────────────── */
 .shutter-layout{display:flex;flex-direction:column;gap:10px;position:relative}
 .shutter-row{display:flex;align-items:stretch;gap:10px;width:100%;flex-wrap:wrap}
 
+/* ─── Camera ───────────────────────────────────────────────────────────── */
 .camera-section{flex:1;position:relative;border-radius:12px;overflow:hidden;
   background:rgba(0,0,0,0.5);border:1px solid ${theme.border};
   min-height:120px;display:flex;align-items:center;justify-content:center;z-index:1;
@@ -159,6 +162,7 @@ function getShutterCSS(haTheme) {
 .camera-section.camera-medium{min-height:150px;max-height:220px}
 .camera-section.camera-large{min-height:200px;max-height:300px}
 
+/* ─── Overlays ─────────────────────────────────────────────────────────── */
 .camera-overlays{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:12px;overflow:hidden}
 .camera-overlay-top{position:absolute;top:0;left:0;right:0;padding:8px 10px;
   display:flex;justify-content:space-between;align-items:flex-start;
@@ -182,13 +186,19 @@ function getShutterCSS(haTheme) {
 .camera-overlay .recording-indicator .rec-dot{width:6px;height:6px;border-radius:50%;
   background:#ef4444;animation:pulse 0.8s ease-in-out infinite}
 
+/* ─── Фоновое изображение ─────────────────────────────────────────────── */
 .camera-section .shutter-bg-image{position:absolute;inset:0;z-index:0;
   background-size:cover;background-position:center;background-repeat:no-repeat;
   opacity:0.6;border-radius:12px}
 
+/* ─── Шторка и ламели ──────────────────────────────────────────────────── */
 .camera-shutters-overlay{position:absolute;inset:0;z-index:2;display:flex;pointer-events:none;border-radius:12px;overflow:hidden}
 .camera-shutters-overlay .shutter-half{flex:1;position:relative;overflow:hidden;pointer-events:auto}
-.camera-shutters-overlay .shutter-half .blind-overlay{position:absolute;inset:0;pointer-events:none;background:transparent}
+
+.camera-shutters-overlay .shutter-half .blind-overlay{position:absolute;inset:0;
+  pointer-events:none;
+  background: transparent;}
+
 .camera-shutters-overlay .shutter-half .blind-overlay .slat{position:absolute;left:2%;right:2%;
   border-radius:2px;transform-origin:center center;
   transition:transform 0.5s ease,top 0.5s ease,opacity 0.5s ease,height 0.5s ease;
@@ -201,6 +211,7 @@ function getShutterCSS(haTheme) {
   pointer-events:none}
 .camera-shutters-overlay .shutter-divider{width:2px;background:rgba(255,255,255,0.15);flex-shrink:0;z-index:3;pointer-events:none}
 
+/* ─── Tilt Controls ────────────────────────────────────────────────────── */
 .tilt-controls{display:flex;gap:4px;justify-content:center;padding:2px 0;order:2}
 .tilt-controls .tilt-btn{flex:1;max-width:50px;padding:4px 6px;border-radius:8px;
   border:1px solid ${theme.border};background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
@@ -213,6 +224,7 @@ function getShutterCSS(haTheme) {
 .tilt-controls .tilt-btn.tilt-up:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
 .tilt-controls .tilt-btn.tilt-down:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
 
+/* ─── Offline / Loading ────────────────────────────────────────────────── */
 .camera-section .camera-offline{display:flex;align-items:center;justify-content:center;height:100%;
   font-size:14px;color:rgba(255,255,255,0.3);flex-direction:column;gap:8px;width:100%;padding:20px}
 .camera-section .camera-offline .ico{font-size:32px}
@@ -221,11 +233,13 @@ function getShutterCSS(haTheme) {
 .camera-section .camera-loading .spinner{width:24px;height:24px;border:3px solid rgba(255,255,255,0.1);
   border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px}
 
+/* ─── Drag Handle ──────────────────────────────────────────────────────── */
 .drag-handle{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:6;
   width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.3);
   pointer-events:none;transition:opacity 0.3s}
 .camera-section:hover .drag-handle{opacity:0.8}
 
+/* ─── Header ───────────────────────────────────────────────────────────── */
 .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:6px}
 .header-left{display:flex;flex-direction:column;gap:2px}
 .header-title{font-size:20px;font-weight:700;color:${theme.text_primary};letter-spacing:-0.3px}
@@ -241,6 +255,7 @@ function getShutterCSS(haTheme) {
 .dot.red{background:var(--cv-closed,#ef4444);animation:pulse 0.8s ease-in-out infinite}
 .dot.off{background:#6b7280}
 
+/* ─── Progress Bar ────────────────────────────────────────────────────── */
 .progress-wrapper{width:100%;padding:2px 0;order:3}
 .progress-bar{width:100%;height:6px;border-radius:4px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
   overflow:hidden;position:relative;transition:opacity 0.3s}
@@ -253,6 +268,7 @@ function getShutterCSS(haTheme) {
   pointer-events:none;display:none}
 .progress-bar:hover .progress-label{display:block}
 
+/* ─── Controls ─────────────────────────────────────────────────────────── */
 .controls{display:flex;gap:6px;justify-content:center;padding:4px 0}
 .controls .control-btn{flex:1;max-width:80px;padding:10px 6px;border-radius:12px;border:1px solid ${theme.border};
   background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
@@ -266,6 +282,7 @@ function getShutterCSS(haTheme) {
 .controls .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
 .controls .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
+/* ─── Dual Mode ────────────────────────────────────────────────────────── */
 .controls-left,.controls-right{display:flex;flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
 .controls-left{order:0}
 .controls-right{order:2}
@@ -282,6 +299,7 @@ function getShutterCSS(haTheme) {
 .controls-left .control-btn.stop:hover,.controls-right .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
 .controls-left .control-btn.close:hover,.controls-right .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
+/* ─── Single Mode ──────────────────────────────────────────────────────── */
 .shutter-controls-left .shutter-row{flex-direction:row}
 .shutter-controls-left .controls{flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
 .shutter-controls-left .controls .control-btn{max-width:none;padding:10px 4px;flex:1;min-height:40px}
@@ -302,6 +320,7 @@ function getShutterCSS(haTheme) {
 .shutter-controls-bottom .controls .control-btn{max-width:80px}
 .shutter-controls-bottom .shutter-row{flex-direction:column}
 
+/* ─── Status Bar ───────────────────────────────────────────────────────── */
 .status-bar{display:flex;justify-content:space-between;align-items:center;
   padding:8px 12px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'};
   border-radius:8px;border:1px solid ${theme.border};flex-wrap:wrap;gap:4px;
@@ -310,27 +329,32 @@ function getShutterCSS(haTheme) {
 .status-left .state{font-weight:600;color:${theme.text_secondary}}
 .status-dual{display:flex;align-items:center;gap:12px;font-size:10px;color:${theme.text_muted}}
 
+/* ─── Badges ───────────────────────────────────────────────────────────── */
 .no-feedback-badge{display:inline-flex;align-items:center;gap:4px;
   font-size:9px;color:${theme.text_muted};padding:2px 8px;
   border-radius:10px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'};
   border:1px solid ${theme.border}}
 
+/* ─── Animations ───────────────────────────────────────────────────────── */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
 @keyframes progressPulse{0%,100%{opacity:1}50%{opacity:0.6}}
 
+/* ─── Mobile ───────────────────────────────────────────────────────────── */
 @media(max-width:500px){
   .inner{padding:12px}
   .header-title{font-size:17px}
   .shutter-layout{gap:8px}
   .shutter-row{flex-direction:column !important;gap:8px !important;align-items:stretch !important}
   .camera-section{width:100% !important;flex:none !important;min-height:130px !important;max-height:200px !important;order:2 !important}
+
   .controls-left,.controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;padding:0 !important}
   .controls-left{order:1 !important;justify-content:flex-start !important}
   .controls-right{order:3 !important;justify-content:flex-end !important}
   .controls-left .control-btn,.controls-right .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .controls-left .control-btn span,.controls-right .control-btn span{display:block !important;font-size:7px !important}
+
   .shutter-controls-dual .shutter-row{flex-direction:column !important}
   .shutter-controls-dual .controls-left,.shutter-controls-dual .controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important}
   .shutter-controls-dual .controls-left{justify-content:flex-start !important}
@@ -341,25 +365,32 @@ function getShutterCSS(haTheme) {
   .shutter-controls-dual .shutter-row .camera-section{order:2 !important}
   .shutter-controls-dual .shutter-row .controls-left{order:1 !important}
   .shutter-controls-dual .shutter-row .controls-right{order:3 !important}
+
   .shutter-controls-left .shutter-row,.shutter-controls-right .shutter-row{flex-direction:column !important}
   .shutter-controls-left .controls,.shutter-controls-right .controls{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;justify-content:center !important}
   .shutter-controls-left .controls .control-btn,.shutter-controls-right .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .shutter-controls-left .controls .control-btn .ico,.shutter-controls-right .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .shutter-controls-left .controls .control-btn span,.shutter-controls-right .controls .control-btn span{display:block !important;font-size:7px !important}
+
   .shutter-controls-top .controls,.shutter-controls-bottom .controls{flex-direction:row !important;width:100% !important;gap:4px !important;justify-content:center !important}
   .shutter-controls-top .controls .control-btn,.shutter-controls-bottom .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .shutter-controls-top .controls .control-btn .ico,.shutter-controls-bottom .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .shutter-controls-top .controls .control-btn span,.shutter-controls-bottom .controls .control-btn span{display:block !important;font-size:7px !important}
+
   .progress-wrapper{width:100% !important;order:4 !important}
   .progress-wrapper .progress-bar{height:4px !important}
+
   .status-bar{flex-wrap:wrap !important;justify-content:center !important;padding:6px 10px !important;order:5 !important}
   .status-dual{flex-wrap:wrap !important;justify-content:center !important;gap:4px !important;font-size:9px !important}
   .status-left{font-size:10px !important}
+
   .header{flex-direction:column !important;align-items:stretch !important;gap:4px !important;margin-bottom:8px !important}
   .header-right{align-items:flex-start !important;gap:2px !important}
   .header-status{font-size:10px !important;padding:2px 10px !important}
   .header-greet{font-size:11px !important}
+
   .camera-section.camera-small,.camera-section.camera-medium,.camera-section.camera-large{min-height:120px !important;max-height:180px !important}
+
   .tilt-controls{order:3 !important;width:100% !important}
   .tilt-controls .tilt-btn{max-width:60px !important;padding:4px 8px !important;font-size:8px !important}
   .tilt-controls .tilt-btn .ico{font-size:14px !important}
@@ -414,94 +445,8 @@ class ShutterCard extends HTMLElement {
 
   getCardSize() { return 6; }
 
-  // ─── Локализация ──────────────────────────────────────────────────────
-  _t(key, params = {}) {
-    const lang = this._config.language || DEFAULT_LANGUAGE;
-    return getLocalizedString(lang, key, params);
-  }
-
   get t() {
-    const self = this;
-    return {
-      _: (key, params = {}) => self._t(key, params),
-      get status() {
-        return {
-          opening: this._('ui.status.opening'),
-          closing: this._('ui.status.closing'),
-          stopped: this._('ui.status.stopped'),
-          open: this._('ui.status.open'),
-          closed: this._('ui.status.closed'),
-          moving: this._('ui.status.moving'),
-          partial: (p) => this._('ui.status.partial', { position: Math.round(p) }),
-        };
-      },
-      get buttons() {
-        return {
-          open: this._('ui.buttons.open'),
-          stop: this._('ui.buttons.stop'),
-          close: this._('ui.buttons.close'),
-        };
-      },
-      get labels() {
-        return {
-          position: this._('ui.labels.position'),
-          camera: this._('ui.labels.camera'),
-          live: this._('ui.labels.live'),
-          offline: this._('ui.labels.offline'),
-          loading: this._('ui.labels.loading'),
-          motion: this._('ui.labels.motion'),
-          recording: this._('ui.labels.recording'),
-          tilt: this._('ui.labels.tilt'),
-          left: this._('ui.labels.left'),
-          right: this._('ui.labels.right'),
-          no_feedback: this._('ui.labels.no_feedback'),
-          memory: this._('ui.labels.memory'),
-          no_camera: this._('ui.labels.no_camera'),
-          seconds: this._('ui.labels.seconds'),
-          minutes: this._('ui.labels.minutes'),
-        };
-      },
-      get overlay() {
-        return {
-          live: this._('ui.overlay.live'),
-          motion_on: this._('ui.overlay.motion_on'),
-          motion_off: this._('ui.overlay.motion_off'),
-          recording_on: this._('ui.overlay.recording_on'),
-          recording_off: this._('ui.overlay.recording_off'),
-        };
-      },
-      get card() {
-        return {
-          title: this._('ui.card.title'),
-          subtitle: this._('ui.card.subtitle'),
-        };
-      },
-      get dual() {
-        return {
-          left: this._('ui.dual.left'),
-          right: this._('ui.dual.right'),
-        };
-      },
-      get feedback() {
-        return {
-          no_feedback: this._('ui.feedback.no_feedback'),
-          memory: this._('ui.feedback.memory'),
-        };
-      },
-      get tilt() {
-        return {
-          up: this._('ui.tilt.up'),
-          down: this._('ui.tilt.down'),
-        };
-      },
-      greet: () => {
-        const hour = new Date().getHours();
-        if (hour < 6) return this._('ui.greetings.night');
-        if (hour < 12) return this._('ui.greetings.morning');
-        if (hour < 18) return this._('ui.greetings.afternoon');
-        return this._('ui.greetings.evening');
-      },
-    };
+    return SHUTTER_TRANSLATIONS[this._config.language || 'ru'] || SHUTTER_TRANSLATIONS.ru;
   }
 
   _getHATheme() {
@@ -739,7 +684,7 @@ class ShutterCard extends HTMLElement {
     
     if (cfg.no_feedback) {
       if (this._isMoving) {
-        return { text: t.status.moving, dot: 'orange', color: '#f59e0b' };
+        return { text: t.status.moving || 'Движется...', dot: 'orange', color: '#f59e0b' };
       }
       if (pos <= 1) return { text: t.status.closed, dot: 'red', color: cfg.color_closed || '#ef4444' };
       if (pos >= 99) return { text: t.status.open, dot: 'green', color: cfg.color_open || '#4ade80' };
@@ -841,6 +786,7 @@ class ShutterCard extends HTMLElement {
     const overlay = this.shadowRoot?.querySelector(`.shutter-half.${side} .blind-overlay`);
     if (!overlay) return;
     
+    // Полностью пересоздаем содержимое overlay
     overlay.innerHTML = '';
     overlay.style.transform = 'none';
     overlay.style.background = 'transparent';
@@ -860,6 +806,7 @@ class ShutterCard extends HTMLElement {
     const effectiveHeight = heightFactor * slatHeight;
     const offset = (slatHeight - effectiveHeight) / 2;
     
+    // Создаем все ламели заново
     for (let i = 0; i < numSlats; i++) {
       const slat = document.createElement('div');
       slat.className = 'slat';
@@ -1146,22 +1093,22 @@ class ShutterCard extends HTMLElement {
         tiltControlsHtml = `
           <div class="tilt-controls" style="display:flex;gap:4px;justify-content:space-between;width:100%;">
             <div style="display:flex;gap:4px;">
-              <button class="tilt-btn tilt-up" data-side="left" data-tilt="up" title="${t.tilt.up}">↕</button>
-              <button class="tilt-btn tilt-down" data-side="left" data-tilt="down" title="${t.tilt.down}">↕</button>
-              <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">${t.dual.left}</span>
+              <button class="tilt-btn tilt-up" data-side="left" data-tilt="up" title="Наклон левой вверх">↕</button>
+              <button class="tilt-btn tilt-down" data-side="left" data-tilt="down" title="Наклон левой вниз">↕</button>
+              <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">Л</span>
             </div>
             <div style="display:flex;gap:4px;">
-              <button class="tilt-btn tilt-up" data-side="right" data-tilt="up" title="${t.tilt.up}">↕</button>
-              <button class="tilt-btn tilt-down" data-side="right" data-tilt="down" title="${t.tilt.down}">↕</button>
-              <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">${t.dual.right}</span>
+              <button class="tilt-btn tilt-up" data-side="right" data-tilt="up" title="Наклон правой вверх">↕</button>
+              <button class="tilt-btn tilt-down" data-side="right" data-tilt="down" title="Наклон правой вниз">↕</button>
+              <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">П</span>
             </div>
           </div>
         `;
       } else {
         tiltControlsHtml = `
           <div class="tilt-controls" style="display:flex;gap:4px;justify-content:center;width:100%;">
-            <button class="tilt-btn tilt-up" data-side="single" data-tilt="up" title="${t.tilt.up}">↕</button>
-            <button class="tilt-btn tilt-down" data-side="single" data-tilt="down" title="${t.tilt.down}">↕</button>
+            <button class="tilt-btn tilt-up" data-side="single" data-tilt="up" title="Наклон вверх">↕</button>
+            <button class="tilt-btn tilt-down" data-side="single" data-tilt="down" title="Наклон вниз">↕</button>
           </div>
         `;
       }
@@ -1234,7 +1181,7 @@ class ShutterCard extends HTMLElement {
     const showLive = showCamera && cameraUrl;
     
     const noFeedbackBadge = cfg.no_feedback ? `
-      <span class="no-feedback-badge">${t.feedback.no_feedback}</span>
+      <span class="no-feedback-badge">📡 Без ОС</span>
     ` : '';
     
     overlayHtml = `
@@ -1243,18 +1190,18 @@ class ShutterCard extends HTMLElement {
           ${showLive ? `
             <div class="badge">
               <span class="dot red"></span>
-              ${t.overlay.live}
+              ${t.labels.live}
             </div>
           ` : ''}
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;${!showLive ? 'margin-left:auto;' : ''}">
             ${cfg.camera_show_motion !== false ? `
               <div class="badge" style="${isMotion ? 'border:1px solid #f59e0b;' : 'opacity:0.5;'}">
-                ${isMotion ? t.overlay.motion_on : t.overlay.motion_off}
+                ${isMotion ? '🔴' : '⚪'} ${t.labels.motion || 'Движение'}
               </div>
             ` : ''}
             ${cfg.camera_show_recording !== false ? `
               <div class="badge" style="${isRecording ? 'border:1px solid #ef4444;' : 'opacity:0.5;'}">
-                ${isRecording ? '<span class="recording-indicator"><span class="rec-dot"></span> ' + t.overlay.recording_on + '</span>' : '⏹ ' + t.overlay.recording_off}
+                ${isRecording ? '<span class="recording-indicator"><span class="rec-dot"></span> REC</span>' : '⏹ ' + (t.labels.recording || 'Запись')}
               </div>
             ` : ''}
             ${noFeedbackBadge}
@@ -1294,7 +1241,7 @@ class ShutterCard extends HTMLElement {
             ${overlayHtml}
             <div id="camera-offline" class="camera-offline" style="display:flex">
               <span class="ico">📷</span>
-              <span>${t.labels.no_camera}</span>
+              <span>${t.labels.offline}</span>
             </div>
           `}
         </div>
@@ -1320,33 +1267,33 @@ class ShutterCard extends HTMLElement {
     if (isDual && cfg.show_controls !== false) {
       leftControlsHtml = `
         <div class="controls-left">
-          <button class="control-btn open" data-side="left" data-action="open" title="${t.buttons.open}">
+          <button class="control-btn open" data-side="left" data-action="open" title="${t.labels.open}">
             <span class="ico">▲</span>
-            <span>${t.buttons.open}</span>
+            <span>${t.labels.open}</span>
           </button>
-          <button class="control-btn stop" data-side="left" data-action="stop" title="${t.buttons.stop}">
+          <button class="control-btn stop" data-side="left" data-action="stop" title="${t.labels.stop}">
             <span class="ico">■</span>
-            <span>${t.buttons.stop}</span>
+            <span>${t.labels.stop}</span>
           </button>
-          <button class="control-btn close" data-side="left" data-action="close" title="${t.buttons.close}">
+          <button class="control-btn close" data-side="left" data-action="close" title="${t.labels.close}">
             <span class="ico">▼</span>
-            <span>${t.buttons.close}</span>
+            <span>${t.labels.close}</span>
           </button>
         </div>
       `;
       rightControlsHtml = `
         <div class="controls-right">
-          <button class="control-btn open" data-side="right" data-action="open" title="${t.buttons.open}">
+          <button class="control-btn open" data-side="right" data-action="open" title="${t.labels.open}">
             <span class="ico">▲</span>
-            <span>${t.buttons.open}</span>
+            <span>${t.labels.open}</span>
           </button>
-          <button class="control-btn stop" data-side="right" data-action="stop" title="${t.buttons.stop}">
+          <button class="control-btn stop" data-side="right" data-action="stop" title="${t.labels.stop}">
             <span class="ico">■</span>
-            <span>${t.buttons.stop}</span>
+            <span>${t.labels.stop}</span>
           </button>
-          <button class="control-btn close" data-side="right" data-action="close" title="${t.buttons.close}">
+          <button class="control-btn close" data-side="right" data-action="close" title="${t.labels.close}">
             <span class="ico">▼</span>
-            <span>${t.buttons.close}</span>
+            <span>${t.labels.close}</span>
           </button>
         </div>
       `;
@@ -1357,17 +1304,17 @@ class ShutterCard extends HTMLElement {
 
     const controlsHtmlSingle = cfg.show_controls !== false && !isDual ? `
       <div class="controls">
-        <button class="control-btn open" id="btn-open" title="${t.buttons.open}">
+        <button class="control-btn open" id="btn-open" title="${t.labels.open}">
           <span class="ico">▲</span>
-          <span>${t.buttons.open}</span>
+          <span>${t.labels.open}</span>
         </button>
-        <button class="control-btn stop" id="btn-stop" title="${t.buttons.stop}">
+        <button class="control-btn stop" id="btn-stop" title="${t.labels.stop}">
           <span class="ico">■</span>
-          <span>${t.buttons.stop}</span>
+          <span>${t.labels.stop}</span>
         </button>
-        <button class="control-btn close" id="btn-close" title="${t.buttons.close}">
+        <button class="control-btn close" id="btn-close" title="${t.labels.close}">
           <span class="ico">▼</span>
-          <span>${t.buttons.close}</span>
+          <span>${t.labels.close}</span>
         </button>
       </div>
     ` : '';
@@ -1384,7 +1331,7 @@ class ShutterCard extends HTMLElement {
 
     let greetText = '';
     if (cfg.show_greet !== false) {
-      try { greetText = t.greet(); } catch (_) { greetText = ''; }
+      try { greetText = t.greet ? t.greet() : ''; } catch (_) { greetText = ''; }
     }
 
     // ─── Header ──────────────────────────────────────────────────────────
@@ -1399,9 +1346,9 @@ class ShutterCard extends HTMLElement {
     } else if (isDual && showStatusBar) {
       headerStatusHtml = `
         <div style="display:flex;gap:12px;font-size:10px;color:${theme.text_muted};flex-wrap:wrap;justify-content:flex-end;">
-          <span style="color:${leftStatus.color}">${t.dual.left}: ${leftStatus.text}</span>
+          <span style="color:${leftStatus.color}">Левая: ${leftStatus.text}</span>
           <span style="color:${theme.text_muted};">|</span>
-          <span style="color:${rightStatus.color}">${t.dual.right}: ${rightStatus.text}</span>
+          <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
         </div>
       `;
     }
@@ -1415,7 +1362,7 @@ class ShutterCard extends HTMLElement {
             <div class="status-left">
               <span>${t.labels.position}:</span>
               <span class="state" style="color:${singleStatus.color}">${Math.round(this._leftPos)}%</span>
-              ${cfg.no_feedback ? `<span class="no-feedback-badge" style="margin-left:8px;">${t.feedback.memory}</span>` : ''}
+              ${cfg.no_feedback ? `<span class="no-feedback-badge" style="margin-left:8px;">💾</span>` : ''}
             </div>
           </div>
         `;
@@ -1423,12 +1370,12 @@ class ShutterCard extends HTMLElement {
         statusBarHtml = `
           <div class="status-bar">
             <div class="status-dual">
-              <span>${t.dual.left}:</span>
+              <span>Левая:</span>
               <span class="state" style="color:${leftStatus.color}">${Math.round(this._leftPos)}%</span>
               <span style="color:${theme.text_muted};">|</span>
-              <span>${t.dual.right}:</span>
+              <span>Правая:</span>
               <span class="state" style="color:${rightStatus.color}">${Math.round(this._rightPos)}%</span>
-              ${cfg.no_feedback ? `<span class="no-feedback-badge" style="margin-left:8px;">${t.feedback.memory}</span>` : ''}
+              ${cfg.no_feedback ? `<span class="no-feedback-badge" style="margin-left:8px;">💾</span>` : ''}
             </div>
           </div>
         `;
@@ -1548,9 +1495,9 @@ class ShutterCard extends HTMLElement {
             const leftStatus = this._getStatusText(this._leftPos, leftState);
             const rightStatus = this._getStatusText(this._rightPos, rightState);
             headerDual.innerHTML = `
-              <span style="color:${leftStatus.color}">${this.t.dual.left}: ${leftStatus.text}</span>
+              <span style="color:${leftStatus.color}">Левая: ${leftStatus.text}</span>
               <span style="color:${theme.text_muted};">|</span>
-              <span style="color:${rightStatus.color}">${this.t.dual.right}: ${rightStatus.text}</span>
+              <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
             `;
           }
         }
@@ -1618,21 +1565,21 @@ class ShutterCard extends HTMLElement {
       let motionBadge = null, recordingBadge = null;
       badges.forEach(badge => {
         const text = badge.textContent;
-        if (text.includes(this.t.labels.motion) || text.includes('Motion')) motionBadge = badge;
-        if (text.includes(this.t.labels.recording) || text.includes('REC') || text.includes('recording')) recordingBadge = badge;
+        if (text.includes('Движение') || text.includes('движение') || text.includes('Motion')) motionBadge = badge;
+        if (text.includes('Запись') || text.includes('запись') || text.includes('REC') || text.includes('recording')) recordingBadge = badge;
       });
       if (motionBadge && cfg.camera_show_motion !== false) {
-        motionBadge.textContent = isMotion ? this.t.overlay.motion_on : this.t.overlay.motion_off;
+        motionBadge.textContent = isMotion ? '🔴 Движение' : '⚪ Движение';
         motionBadge.style.border = isMotion ? '1px solid #f59e0b' : 'none';
         motionBadge.style.opacity = isMotion ? '1' : '0.5';
       }
       if (recordingBadge && cfg.camera_show_recording !== false) {
         if (isRecording) {
-          recordingBadge.innerHTML = '<span class="recording-indicator"><span class="rec-dot"></span> ' + this.t.overlay.recording_on + '</span>';
+          recordingBadge.innerHTML = '<span class="recording-indicator"><span class="rec-dot"></span> REC</span>';
           recordingBadge.style.border = '1px solid #ef4444';
           recordingBadge.style.opacity = '1';
         } else {
-          recordingBadge.textContent = '⏹ ' + this.t.overlay.recording_off;
+          recordingBadge.textContent = '⏹ Запись';
           recordingBadge.style.border = 'none';
           recordingBadge.style.opacity = '0.5';
         }
@@ -1920,137 +1867,7 @@ class ShutterCardEditor extends HTMLElement {
   }
 
   get t() {
-    const lang = this._config.language || DEFAULT_LANGUAGE;
-    const get = (key, params = {}) => getLocalizedString(lang, key, params);
-    return {
-      _: get,
-      get labels() {
-        return {
-          seconds: get('ui.labels.seconds'),
-          minutes: get('ui.labels.minutes'),
-          tilt: get('ui.labels.tilt'),
-        };
-      },
-      get dual() {
-        return {
-          left: get('ui.dual.left'),
-          right: get('ui.dual.right'),
-        };
-      },
-      get sections() {
-        return {
-          language: get('editor.sections.language'),
-          title: get('editor.sections.title'),
-          entities: get('editor.sections.entities'),
-          tilt: get('editor.sections.tilt'),
-          camera: get('editor.sections.camera'),
-          overlay: get('editor.sections.overlay'),
-          display: get('editor.sections.display'),
-          colors: get('editor.sections.colors'),
-          background: get('editor.sections.background'),
-          advanced: get('editor.sections.advanced'),
-        };
-      },
-      get fields() {
-        return {
-          title: get('editor.fields.title'),
-          subtitle: get('editor.fields.subtitle'),
-          owner_name: get('editor.fields.owner_name'),
-          theme: get('editor.fields.theme'),
-          theme_auto: get('editor.fields.theme_auto'),
-          theme_dark: get('editor.fields.theme_dark'),
-          theme_light: get('editor.fields.theme_light'),
-          mode: get('editor.fields.mode'),
-          mode_single: get('editor.fields.mode_single'),
-          mode_single_sub: get('editor.fields.mode_single_sub'),
-          mode_dual: get('editor.fields.mode_dual'),
-          mode_dual_sub: get('editor.fields.mode_dual_sub'),
-          entity: get('editor.fields.entity'),
-          camera_entity: get('editor.fields.camera_entity'),
-          motion_entity: get('editor.fields.motion_entity'),
-          recording_entity: get('editor.fields.recording_entity'),
-          tilt_entity: get('editor.fields.tilt_entity'),
-          tilt_entity_hint: get('editor.fields.tilt_entity_hint'),
-          tilt_visual: get('editor.fields.tilt_visual'),
-          tilt_visual_desc: get('editor.fields.tilt_visual_desc'),
-          tilt_controls: get('editor.fields.tilt_controls'),
-          tilt_controls_desc: get('editor.fields.tilt_controls_desc'),
-          camera_size: get('editor.fields.camera_size'),
-          camera_size_small: get('editor.fields.camera_size_small'),
-          camera_size_medium: get('editor.fields.camera_size_medium'),
-          camera_size_large: get('editor.fields.camera_size_large'),
-          camera_show: get('editor.fields.camera_show'),
-          camera_show_desc: get('editor.fields.camera_show_desc'),
-          refresh_interval: get('editor.fields.refresh_interval'),
-          refresh_interval_desc: get('editor.fields.refresh_interval_desc'),
-          show_timestamp: get('editor.fields.show_timestamp'),
-          show_timestamp_desc: get('editor.fields.show_timestamp_desc'),
-          show_motion: get('editor.fields.show_motion'),
-          show_motion_desc: get('editor.fields.show_motion_desc'),
-          show_recording: get('editor.fields.show_recording'),
-          show_recording_desc: get('editor.fields.show_recording_desc'),
-          controls_position: get('editor.fields.controls_position'),
-          controls_bottom: get('editor.fields.controls_bottom'),
-          controls_bottom_sub: get('editor.fields.controls_bottom_sub'),
-          controls_top: get('editor.fields.controls_top'),
-          controls_top_sub: get('editor.fields.controls_top_sub'),
-          controls_left: get('editor.fields.controls_left'),
-          controls_left_sub: get('editor.fields.controls_left_sub'),
-          controls_right: get('editor.fields.controls_right'),
-          controls_right_sub: get('editor.fields.controls_right_sub'),
-          show_greeting: get('editor.fields.show_greeting'),
-          show_greeting_desc: get('editor.fields.show_greeting_desc'),
-          show_position: get('editor.fields.show_position'),
-          show_controls: get('editor.fields.show_controls'),
-          show_status: get('editor.fields.show_status'),
-          invert_position: get('editor.fields.invert_position'),
-          invert_position_desc: get('editor.fields.invert_position_desc'),
-          shutter_color: get('editor.fields.shutter_color'),
-          shutter_color_left: get('editor.fields.shutter_color_left'),
-          shutter_color_right: get('editor.fields.shutter_color_right'),
-          opacity: get('editor.fields.opacity'),
-          progress_bar: get('editor.fields.progress_bar'),
-          progress_bar_desc: get('editor.fields.progress_bar_desc'),
-          progress_style: get('editor.fields.progress_style'),
-          progress_gradient: get('editor.fields.progress_gradient'),
-          progress_solid: get('editor.fields.progress_solid'),
-          no_feedback: get('editor.fields.no_feedback'),
-          no_feedback_desc: get('editor.fields.no_feedback_desc'),
-          memory_type: get('editor.fields.memory_type'),
-          memory_localstorage: get('editor.fields.memory_localstorage'),
-          memory_input_number: get('editor.fields.memory_input_number'),
-          input_number: get('editor.fields.input_number'),
-          input_number_left: get('editor.fields.input_number_left'),
-          input_number_right: get('editor.fields.input_number_right'),
-          bg_image: get('editor.fields.bg_image'),
-          bg_image_desc: get('editor.fields.bg_image_desc'),
-          bg_preset: get('editor.fields.bg_preset'),
-          bg_alpha: get('editor.fields.bg_alpha'),
-          bg_blur: get('editor.fields.bg_blur'),
-          bg_custom_color1: get('editor.fields.bg_custom_color1'),
-          bg_custom_color2: get('editor.fields.bg_custom_color2'),
-        };
-      },
-      get colors() {
-        return {
-          accent: get('editor.colors.accent'),
-          text: get('editor.colors.text'),
-          open: get('editor.colors.open'),
-          closed: get('editor.colors.closed'),
-          reset: get('editor.colors.reset'),
-        };
-      },
-      get info() {
-        return {
-          overlay_hint: get('editor.info.overlay_hint'),
-          dual_layout: get('editor.info.dual_layout'),
-          tilt_info: get('editor.info.tilt_info'),
-          bg_image_hint: get('editor.info.bg_image_hint'),
-          no_feedback_hint: get('editor.info.no_feedback_hint'),
-          version: get('editor.info.version'),
-        };
-      },
-    };
+    return SHUTTER_TRANSLATIONS[this._config.language || 'ru'] || SHUTTER_TRANSLATIONS.ru;
   }
 
   _fire() {
@@ -2151,7 +1968,7 @@ class ShutterCardEditor extends HTMLElement {
   _render() {
     const cfg = this._config;
     const t = this.t;
-    const lang = cfg.language || 'en';
+    const lang = cfg.language || 'ru';
     const bgP = cfg.background_preset || 'default';
     const refreshInterval = cfg.camera_refresh_interval || 300;
     const theme = cfg.theme || 'auto';
@@ -2159,12 +1976,10 @@ class ShutterCardEditor extends HTMLElement {
     const controlsPos = cfg.controls_position || 'bottom';
     const noFeedback = cfg.no_feedback || false;
     const memoryType = cfg.memory_type || 'localstorage';
+    const showProgressBar = cfg.show_progress_bar !== false;
     const progressStyle = cfg.progress_bar_style || 'gradient';
-
-    const languages = {
-      en: { name: 'English', flag: 'gb' },
-      ru: { name: 'Русский', flag: 'ru' },
-    };
+    const showTiltControls = cfg.show_tilt_controls || false;
+    const showTiltVisual = cfg.show_tilt_visual !== false;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -2323,7 +2138,6 @@ class ShutterCardEditor extends HTMLElement {
         .dual-info {
           font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;
           padding:8px 12px;background:var(--secondary-background-color);border-radius:6px;
-          white-space:pre-line;
         }
         .memory-options {
           display:${noFeedback ? 'block' : 'none'};
@@ -2363,31 +2177,25 @@ class ShutterCardEditor extends HTMLElement {
         .tilt-entity-row .row:last-child {
           margin-bottom:0;
         }
-        .tilt-info-box {
-          font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;
-          padding:6px 10px;background:var(--secondary-background-color);border-radius:6px;
-          border-left:3px solid var(--primary-color);
-          white-space:pre-line;
-        }
       </style>
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">${t.info.version}</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.4 — Исправлено полное пересоздание ламелей при обновлении</span>
         </div>
 
         <!-- Language -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-lang">
-            <span>${t.sections.language}</span>
+            <span>${t.edLang || 'Язык'}</span>
             <span class="acc-arrow" id="arrow-lang">${this._open.lang ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-lang" style="display:${this._open.lang ? 'block' : 'none'}">
             <div class="lang-grid">
-              ${Object.entries(languages).map(([code, info]) => `
+              ${Object.entries(SHUTTER_TRANSLATIONS).map(([code, tr]) => `
                 <div class="lang-btn ${lang === code ? 'on' : ''}" data-lang="${code}">
-                  <img src="https://flagcdn.com/20x15/${info.flag}.png" width="20" height="15" alt="${info.name}" style="border-radius:2px;flex-shrink:0;display:block;">
-                  ${info.name}
+                  <img src="https://flagcdn.com/20x15/${tr.flag}.png" width="20" height="15" alt="${tr.lang}" style="border-radius:2px;flex-shrink:0;display:block;">
+                  ${tr.lang}
                 </div>
               `).join('')}
             </div>
@@ -2397,29 +2205,38 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Title & Theme -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-title">
-            <span>${t.sections.title}</span>
+            <span>${t.edTitle || 'Название'}</span>
             <span class="acc-arrow" id="arrow-title">${this._open.title ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-title" style="display:${this._open.title ? 'block' : 'none'}">
             <div class="row">
-              <label>${t.fields.title}</label>
+              <label>${t.edTitleLabel || 'Название карточки'}</label>
               <input class="txt-inp" type="text" id="inp-title" value="${cfg.title || ''}" placeholder=""/>
             </div>
             <div class="row">
-              <label>${t.fields.subtitle}</label>
+              <label>${t.edSubtitleLabel || 'Подзаголовок'}</label>
               <input class="txt-inp" type="text" id="inp-subtitle" value="${cfg.subtitle || ''}" placeholder=""/>
             </div>
             <div class="row">
-              <label>${t.fields.owner_name}</label>
+              <label>${t.edOwnerName || 'Имя владельца'}</label>
               <input class="txt-inp" type="text" id="inp-owner" value="${cfg.owner_name || ''}" placeholder="Smart Home"/>
             </div>
             <div style="height:1px;background:var(--divider-color);margin:8px 0;"></div>
             
-            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.fields.theme}</label>
+            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.edTheme || 'Тема'}</label>
             <div class="theme-grid">
-              <div class="theme-btn ${theme === 'auto' ? 'on' : ''}" data-theme="auto">${t.fields.theme_auto}</div>
-              <div class="theme-btn ${theme === 'dark' ? 'on' : ''}" data-theme="dark">${t.fields.theme_dark}</div>
-              <div class="theme-btn ${theme === 'light' ? 'on' : ''}" data-theme="light">${t.fields.theme_light}</div>
+              <div class="theme-btn ${theme === 'auto' ? 'on' : ''}" data-theme="auto">
+                ${t.edThemeAuto || 'Авто'}
+                <span class="sub">${t.edThemeDesc || 'Системная'}</span>
+              </div>
+              <div class="theme-btn ${theme === 'dark' ? 'on' : ''}" data-theme="dark">
+                ${t.edThemeDark || 'Тёмная'}
+                <span class="sub">${t.edThemeDesc || ''}</span>
+              </div>
+              <div class="theme-btn ${theme === 'light' ? 'on' : ''}" data-theme="light">
+                ${t.edThemeLight || 'Светлая'}
+                <span class="sub">${t.edThemeDesc || ''}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -2427,26 +2244,26 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Mode & Entities -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-entities">
-            <span>${t.sections.entities}</span>
+            <span>${t.edEntities || 'Сущности'}</span>
             <span class="acc-arrow" id="arrow-entities">${this._open.entities ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-entities" style="display:${this._open.entities ? 'block' : 'none'}">
-            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.fields.mode}</label>
+            <label style="font-size:12px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;display:block;">${t.edMode || 'Режим'}</label>
             <div class="mode-grid">
               <div class="mode-btn ${mode === 'single' ? 'on' : ''}" data-mode="single">
-                ${t.fields.mode_single}
-                <span class="sub">${t.fields.mode_single_sub}</span>
+                ${t.edModeSingle || 'Одно'}
+                <span class="sub">${t.edModeSingleSub || 'Одна шторка'}</span>
               </div>
               <div class="mode-btn ${mode === 'dual' ? 'on' : ''}" data-mode="dual">
-                ${t.fields.mode_dual}
-                <span class="sub">${t.fields.mode_dual_sub}</span>
+                ${t.edModeDual || 'Два'}
+                <span class="sub">${t.edModeDualSub || 'Левая + Правая'}</span>
               </div>
             </div>
 
             <div class="${mode === 'single' ? '' : 'dual-entities'}">
-              ${this._entityField('entity_id', t.fields.entity, 'cover')}
+              ${this._entityField('entity_id', t.edEntity || 'Сущность жалюзи', 'cover')}
               <div class="row">
-                <label>${t.fields.shutter_color}</label>
+                <label>Цвет шторки (RGBA)</label>
                 <div class="color-blind-row">
                   <input type="color" id="color-blind-picker" value="#1a1a2e" />
                   <input class="txt-inp" type="text" id="color-blind-text" 
@@ -2454,7 +2271,7 @@ class ShutterCardEditor extends HTMLElement {
                     placeholder="rgba(26, 26, 46, 0.85)" />
                 </div>
                 <div class="color-blind-alpha">
-                  <label>${t.fields.opacity}</label>
+                  <label>Прозрачность:</label>
                   <input type="range" id="color-blind-alpha" min="0" max="100" step="1" 
                     value="${parseFloat((cfg.color_blind || 'rgba(26,26,46,0.85)').match(/[\d.]+(?=\))/)?.[0] || 0.85) * 100}" />
                   <span class="alpha-value" id="color-blind-alpha-label">
@@ -2463,18 +2280,18 @@ class ShutterCardEditor extends HTMLElement {
                 </div>
               </div>
               <div class="tilt-entity-row">
-                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ ${t.labels.tilt}</div>
-                ${this._entityField('tilt_entity_id', t.fields.tilt_entity, 'cover')}
-                <div style="font-size:10px;color:var(--secondary-text-color);margin-top:2px;">${t.fields.tilt_entity_hint}</div>
+                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ Наклон ламелей</div>
+                ${this._entityField('tilt_entity_id', 'Сущность наклона (опционально)', 'cover')}
+                <div style="font-size:10px;color:var(--secondary-text-color);margin-top:2px;">Если не указана, используется основная сущность</div>
               </div>
             </div>
 
             <div class="dual-entities" id="dual-entities">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <div>
-                  ${this._entityField('left_entity_id', t.fields.entity + ' (' + t.dual.left + ')', 'cover')}
+                  ${this._entityField('left_entity_id', 'Сущность (левая)', 'cover')}
                   <div class="row">
-                    <label>${t.fields.shutter_color_left}</label>
+                    <label>Цвет шторки (левая)</label>
                     <div class="color-blind-row">
                       <input type="color" id="left-color-blind-picker" value="#1a1a2e" />
                       <input class="txt-inp" type="text" id="left-color-blind-text" 
@@ -2482,7 +2299,7 @@ class ShutterCardEditor extends HTMLElement {
                         placeholder="rgba(26, 26, 46, 0.85)" />
                     </div>
                     <div class="color-blind-alpha">
-                      <label>${t.fields.opacity}</label>
+                      <label>Прозрачность:</label>
                       <input type="range" id="left-color-blind-alpha" min="0" max="100" step="1" 
                         value="${parseFloat((cfg.left_color_blind || 'rgba(26,26,46,0.85)').match(/[\d.]+(?=\))/)?.[0] || 0.85) * 100}" />
                       <span class="alpha-value" id="left-color-blind-alpha-label">
@@ -2491,13 +2308,13 @@ class ShutterCardEditor extends HTMLElement {
                     </div>
                   </div>
                   <div class="tilt-entity-row">
-                    ${this._entityField('tilt_entity_left', t.fields.tilt_entity + ' (' + t.dual.left + ')', 'cover')}
+                    ${this._entityField('tilt_entity_left', 'Наклон (левая)', 'cover')}
                   </div>
                 </div>
                 <div>
-                  ${this._entityField('right_entity_id', t.fields.entity + ' (' + t.dual.right + ')', 'cover')}
+                  ${this._entityField('right_entity_id', 'Сущность (правая)', 'cover')}
                   <div class="row">
-                    <label>${t.fields.shutter_color_right}</label>
+                    <label>Цвет шторки (правая)</label>
                     <div class="color-blind-row">
                       <input type="color" id="right-color-blind-picker" value="#1a1a2e" />
                       <input class="txt-inp" type="text" id="right-color-blind-text" 
@@ -2505,7 +2322,7 @@ class ShutterCardEditor extends HTMLElement {
                         placeholder="rgba(26, 26, 46, 0.85)" />
                     </div>
                     <div class="color-blind-alpha">
-                      <label>${t.fields.opacity}</label>
+                      <label>Прозрачность:</label>
                       <input type="range" id="right-color-blind-alpha" min="0" max="100" step="1" 
                         value="${parseFloat((cfg.right_color_blind || 'rgba(26,26,46,0.85)').match(/[\d.]+(?=\))/)?.[0] || 0.85) * 100}" />
                       <span class="alpha-value" id="right-color-blind-alpha-label">
@@ -2514,61 +2331,66 @@ class ShutterCardEditor extends HTMLElement {
                     </div>
                   </div>
                   <div class="tilt-entity-row">
-                    ${this._entityField('tilt_entity_right', t.fields.tilt_entity + ' (' + t.dual.right + ')', 'cover')}
+                    ${this._entityField('tilt_entity_right', 'Наклон (правая)', 'cover')}
                   </div>
                 </div>
               </div>
             </div>
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
-            ${this._entityField('camera_entity', t.fields.camera_entity, 'camera')}
-            ${this._entityField('motion_entity', t.fields.motion_entity, 'binary_sensor')}
-            ${this._entityField('recording_entity', t.fields.recording_entity, 'binary_sensor')}
+            ${this._entityField('camera_entity', 'Камера', 'camera')}
+            ${this._entityField('motion_entity', 'Датчик движения', 'binary_sensor')}
+            ${this._entityField('recording_entity', 'Статус записи', 'binary_sensor')}
           </div>
         </div>
 
         <!-- Tilt Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-tilt">
-            <span>${t.sections.tilt}</span>
+            <span>↕ Наклон ламелей</span>
             <span class="acc-arrow" id="arrow-tilt">${this._open.tilt ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-tilt" style="display:${this._open.tilt ? 'block' : 'none'}">
-            <div class="tilt-info-box">${t.info.tilt_info}</div>
-            ${this._toggleSwitch('show_tilt_visual', t.fields.tilt_visual, t.fields.tilt_visual_desc)}
-            ${this._toggleSwitch('show_tilt_controls', t.fields.tilt_controls, t.fields.tilt_controls_desc)}
+            <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;padding:6px 10px;background:var(--secondary-background-color);border-radius:6px;border-left:3px solid var(--primary-color);">
+              <strong>Новая логика наклона:</strong><br>
+              0% = полностью закрыто (ламели плотно прилегают друг к другу)<br>
+              50% = половина открыто<br>
+              100% = полностью открыто (ламели повернуты ребром)
+            </div>
+            ${this._toggleSwitch('show_tilt_visual', 'Включить наклон ламелей', 'Выключено — ламели всегда в положении 0% (плотно закрыты)')}
+            ${this._toggleSwitch('show_tilt_controls', 'Показать кнопки наклона', 'Кнопки ↕ под шторкой (только если наклон включён)')}
           </div>
         </div>
 
         <!-- Camera Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-camera">
-            <span>${t.sections.camera}</span>
+            <span>${t.edCamera || 'Камера'}</span>
             <span class="acc-arrow" id="arrow-camera">${this._open.camera ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-camera" style="display:${this._open.camera ? 'block' : 'none'}">
-            ${this._toggleSwitch('show_camera', t.fields.camera_show, t.fields.camera_show_desc)}
+            ${this._toggleSwitch('show_camera', 'Показать камеру', 'Отображать камеру на карточке')}
 
-            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin:10px 0 6px;">${t.fields.camera_size}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin:10px 0 6px;">${t.edCameraSize || 'Размер камеры'}</div>
             <div class="select-grid">
               ${['small', 'medium', 'large'].map(size => `
                 <div class="sel-btn ${(cfg.camera_size || 'medium') === size ? 'on' : ''}" data-cam-size="${size}">
-                  ${t.fields['camera_size_' + size] || size}
+                  ${t[`edCameraSize${size.charAt(0).toUpperCase() + size.slice(1)}`] || size}
                 </div>
               `).join('')}
             </div>
 
             <div class="row" style="margin-top:12px;">
-              <label>${t.fields.refresh_interval}</label>
+              <label>${t.edRefreshInterval || 'Интервал обновления'}</label>
               <div style="display:flex;align-items:center;gap:10px;">
                 <input class="txt-inp" type="number" id="inp-refresh-interval" 
                   min="10" max="3600" step="10" 
                   value="${refreshInterval}" 
                   style="width:100px;text-align:center;"/>
-                <span style="font-size:12px;color:var(--secondary-text-color);">${t.labels.seconds}</span>
-                <span style="font-size:10px;color:var(--secondary-text-color);opacity:0.6;">(${t.labels.minutes}: ${Math.round(refreshInterval/60)})</span>
+                <span style="font-size:12px;color:var(--secondary-text-color);">сек</span>
+                <span style="font-size:10px;color:var(--secondary-text-color);opacity:0.6;">(мин: ${Math.round(refreshInterval/60)})</span>
               </div>
-              <div style="font-size:11px;color:var(--secondary-text-color);margin-top:4px;">${t.fields.refresh_interval_desc}</div>
+              <div style="font-size:11px;color:var(--secondary-text-color);margin-top:4px;">${t.edRefreshIntervalDesc || 'Как часто обновлять кадр камеры (сек)'}</div>
             </div>
           </div>
         </div>
@@ -2576,32 +2398,32 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Overlay Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-overlay">
-            <span>${t.sections.overlay}</span>
+            <span>Оверлей</span>
             <span class="acc-arrow" id="arrow-overlay">${this._open.overlay ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-overlay" style="display:${this._open.overlay ? 'block' : 'none'}">
-            <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;">${t.info.overlay_hint}</div>
-            ${this._toggleSwitch('camera_show_timestamp', t.fields.show_timestamp, t.fields.show_timestamp_desc)}
-            ${this._toggleSwitch('camera_show_motion', t.fields.show_motion, t.fields.show_motion_desc)}
-            ${this._toggleSwitch('camera_show_recording', t.fields.show_recording, t.fields.show_recording_desc)}
+            <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;">Настройки отображения поверх видео</div>
+            ${this._toggleSwitch('camera_show_timestamp', 'Показывать время', 'Отображать текущее время на видео')}
+            ${this._toggleSwitch('camera_show_motion', 'Индикатор движения', 'Показывать статус датчика движения')}
+            ${this._toggleSwitch('camera_show_recording', 'Индикатор записи', 'Показывать статус записи')}
           </div>
         </div>
 
         <!-- Display -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-display">
-            <span>${t.sections.display}</span>
+            <span>${t.edDisplay || 'Отображение'}</span>
             <span class="acc-arrow" id="arrow-display">${this._open.display ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-display" style="display:${this._open.display ? 'block' : 'none'}">
             ${mode === 'single' ? `
-              <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">${t.fields.controls_position}</div>
+              <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">Расположение кнопок управления</div>
               <div class="controls-pos-grid">
                 ${[
-                  { id: 'bottom', label: t.fields.controls_bottom, sub: t.fields.controls_bottom_sub },
-                  { id: 'top', label: t.fields.controls_top, sub: t.fields.controls_top_sub },
-                  { id: 'left', label: t.fields.controls_left, sub: t.fields.controls_left_sub },
-                  { id: 'right', label: t.fields.controls_right, sub: t.fields.controls_right_sub },
+                  { id: 'bottom', label: '⬇️ Снизу', sub: 'Горизонтально' },
+                  { id: 'top', label: '⬆️ Сверху', sub: 'Горизонтально' },
+                  { id: 'left', label: '⬅️ Слева', sub: 'Вертикально' },
+                  { id: 'right', label: '➡️ Справа', sub: 'Вертикально' },
                 ].map(p => `
                   <div class="controls-pos-btn ${controlsPos === p.id ? 'on' : ''}" data-controls-pos="${p.id}">
                     ${p.label}
@@ -2610,54 +2432,58 @@ class ShutterCardEditor extends HTMLElement {
                 `).join('')}
               </div>
             ` : `
-              <div class="dual-info">${t.info.dual_layout}</div>
+              <div class="dual-info">
+                📌 В режиме "Два" кнопки управления расположены:<br>
+                ⬅️ Слева — для левой шторки<br>
+                ➡️ Справа — для правой шторки
+              </div>
             `}
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            ${this._toggleSwitch('show_greet', t.fields.show_greeting, t.fields.show_greeting_desc)}
-            ${this._toggleSwitch('show_position', t.fields.show_position, '')}
-            ${this._toggleSwitch('show_controls', t.fields.show_controls, '')}
-            ${this._toggleSwitch('show_status', t.fields.show_status, '')}
-            ${this._toggleSwitch('invert_position', t.fields.invert_position, t.fields.invert_position_desc)}
+            ${this._toggleSwitch('show_greet', 'Приветствие', 'Показать приветствие по времени суток')}
+            ${this._toggleSwitch('show_position', 'Показать позицию', '')}
+            ${this._toggleSwitch('show_controls', 'Показать управление', '')}
+            ${this._toggleSwitch('show_status', 'Показать статус', '')}
+            ${this._toggleSwitch('invert_position', 'Инвертировать позицию', 'Инвертировать значение позиции (100% = закрыто)')}
           </div>
         </div>
 
         <!-- Advanced Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-advanced">
-            <span>${t.sections.advanced}</span>
+            <span>⚙️ Расширенные настройки</span>
             <span class="acc-arrow" id="arrow-advanced">${this._open.advanced ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-advanced" style="display:${this._open.advanced ? 'block' : 'none'}">
             
-            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📊 ${t.fields.progress_bar}</div>
-            ${this._toggleSwitch('show_progress_bar', t.fields.progress_bar, t.fields.progress_bar_desc)}
+            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📊 Шкала прогресса</div>
+            ${this._toggleSwitch('show_progress_bar', 'Показать шкалу прогресса', 'Отображать анимированную шкалу под шторкой')}
             
-            <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">${t.fields.progress_style}</div>
+            <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">Стиль шкалы</div>
             <div class="style-grid">
-              <div class="style-btn ${progressStyle === 'gradient' ? 'on' : ''}" data-progress-style="gradient">${t.fields.progress_gradient}</div>
-              <div class="style-btn ${progressStyle === 'solid' ? 'on' : ''}" data-progress-style="solid">${t.fields.progress_solid}</div>
+              <div class="style-btn ${progressStyle === 'gradient' ? 'on' : ''}" data-progress-style="gradient">🌈 Градиент</div>
+              <div class="style-btn ${progressStyle === 'solid' ? 'on' : ''}" data-progress-style="solid">⬛ Сплошной</div>
             </div>
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📡 ${t.fields.no_feedback}</div>
-            ${this._toggleSwitch('no_feedback', t.fields.no_feedback, t.fields.no_feedback_desc)}
+            <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📡 Режим без обратной связи</div>
+            ${this._toggleSwitch('no_feedback', 'Включить режим без ОС', 'Для устройств без датчика положения')}
             
             <div class="memory-options" id="memory-options">
-              <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">${t.fields.memory_type}</div>
+              <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin:8px 0 4px;">Способ хранения позиции</div>
               <div class="style-grid">
-                <div class="style-btn ${memoryType === 'localstorage' ? 'on' : ''}" data-memory-type="localstorage">${t.fields.memory_localstorage}</div>
-                <div class="style-btn ${memoryType === 'input_number' ? 'on' : ''}" data-memory-type="input_number">${t.fields.memory_input_number}</div>
+                <div class="style-btn ${memoryType === 'localstorage' ? 'on' : ''}" data-memory-type="localstorage">💾 localStorage</div>
+                <div class="style-btn ${memoryType === 'input_number' ? 'on' : ''}" data-memory-type="input_number">📝 input_number</div>
               </div>
               
               <div id="input-number-fields" style="display:${memoryType === 'input_number' ? 'block' : 'none'};margin-top:8px;">
                 ${mode === 'single' ? `
-                  ${this._entityField('input_number_entity', t.fields.input_number, 'input_number')}
+                  ${this._entityField('input_number_entity', 'Input number для хранения позиции', 'input_number')}
                 ` : `
-                  ${this._entityField('left_input_number', t.fields.input_number_left, 'input_number')}
-                  ${this._entityField('right_input_number', t.fields.input_number_right, 'input_number')}
+                  ${this._entityField('left_input_number', 'Input number (левая)', 'input_number')}
+                  ${this._entityField('right_input_number', 'Input number (правая)', 'input_number')}
                 `}
               </div>
             </div>
@@ -2667,36 +2493,38 @@ class ShutterCardEditor extends HTMLElement {
         <!-- Colors -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-colors">
-            <span>${t.sections.colors}</span>
+            <span>${t.edColors || 'Цвета'}</span>
             <span class="acc-arrow" id="arrow-colors">${this._open.colors ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-colors" style="display:${this._open.colors ? 'block' : 'none'}">
-            ${this._colorRow('color_open', t.colors.open)}
-            ${this._colorRow('color_closed', t.colors.closed)}
-            ${this._colorRow('color_accent', t.colors.accent)}
-            ${this._colorRow('color_text', t.colors.text)}
-            <button class="reset-btn" id="btn-reset-colors">${t.colors.reset}</button>
+            ${this._colorRow('color_open', 'Цвет открыто')}
+            ${this._colorRow('color_closed', 'Цвет закрыто')}
+            ${this._colorRow('color_accent', 'Акцентный цвет')}
+            ${this._colorRow('color_text', 'Цвет текста')}
+            <button class="reset-btn" id="btn-reset-colors">↩ Сбросить цвета</button>
           </div>
         </div>
 
         <!-- Background -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-bg">
-            <span>${t.sections.background}</span>
+            <span>${t.edBg || 'Фон для шторки'}</span>
             <span class="acc-arrow" id="arrow-bg">${this._open.bg ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-bg" style="display:${this._open.bg ? 'block' : 'none'}">
             <div class="row">
-              <label>${t.fields.bg_image}</label>
+              <label>URL фонового изображения (под шторкой)</label>
               <input class="txt-inp" type="text" id="inp-bg-image" 
                 value="${cfg.bg_image || ''}" 
                 placeholder="https://example.com/background.jpg или /local/image.jpg"/>
-              <div style="font-size:10px;color:var(--secondary-text-color);margin-top:4px;">${t.info.bg_image_hint}</div>
+              <div style="font-size:10px;color:var(--secondary-text-color);margin-top:4px;">
+                Изображение будет показано как фон под шторкой, только когда камера выключена.
+              </div>
             </div>
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:8px;">${t.fields.bg_preset}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--secondary-text-color);margin-bottom:8px;">${t.edBgPresets || 'Пресет градиента'}</div>
             <div class="bg-grid">
               ${SHUTTER_BG_PRESETS.map(p => {
                 const c1 = p.c1 || '#888', c2 = p.c2 || '#444';
@@ -2707,17 +2535,17 @@ class ShutterCardEditor extends HTMLElement {
             </div>
             ${bgP === 'custom' ? `
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
-                ${this._colorRow('bg_color1', t.fields.bg_custom_color1)}
-                ${this._colorRow('bg_color2', t.fields.bg_custom_color2)}
+                ${this._colorRow('bg_color1', 'Цвет 1')}
+                ${this._colorRow('bg_color2', 'Цвет 2')}
               </div>
             ` : ''}
             <div class="sl-row">
-              <label>${t.fields.bg_alpha}</label>
+              <label>${t.edBgAlpha || 'Прозрачность'}</label>
               <input type="range" id="inp-bg-alpha" min="0" max="100" step="1" value="${cfg.bg_alpha !== undefined ? cfg.bg_alpha : 85}"/>
               <span class="slv" id="bg-alpha-lbl">${cfg.bg_alpha !== undefined ? cfg.bg_alpha : 85}%</span>
             </div>
             <div class="sl-row" style="margin-top:4px;">
-              <label>${t.fields.bg_blur}</label>
+              <label>${t.edBgBlur || 'Размытие'}</label>
               <input type="range" id="inp-bg-blur" min="0" max="30" step="1" value="${cfg.bg_blur !== undefined ? cfg.bg_blur : 12}"/>
               <span class="slv" id="bg-blur-lbl">${cfg.bg_blur !== undefined ? cfg.bg_blur : 12}px</span>
             </div>
@@ -2906,7 +2734,7 @@ class ShutterCardEditor extends HTMLElement {
         this._config.camera_refresh_interval = Math.max(10, Math.min(3600, val));
         const minSpan = refreshInterval.parentElement?.querySelector('span:last-child');
         if (minSpan) {
-          minSpan.textContent = `(${this.t.labels.minutes}: ${Math.round(this._config.camera_refresh_interval/60)})`;
+          minSpan.textContent = `(мин: ${Math.round(this._config.camera_refresh_interval/60)})`;
         }
         this._fire();
       });
@@ -3056,7 +2884,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.2.5 %c Полная локализация всех строк!',
+  '%c 🪟 Shutter Card %c v1.2.4 %c Исправлено полное пересоздание ламелей при обновлении!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
